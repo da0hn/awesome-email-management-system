@@ -13,7 +13,6 @@ spring:
   docker:
     compose:
       enabled: ${DOCKER_COMPOSE_ENABLED:true}
-      network: email-manager-system-network
       lifecycle-management: start_only
   mail:
     host: imap.gmail.com
