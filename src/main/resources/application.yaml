@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: email-manager-system
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/email_manager_system
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    url: ${spring.datasource.url}
+  docker:
+    compose:
+      enabled: ${DOCKER_COMPOSE_ENABLED:true}
+      network: email-manager-system-network
+      lifecycle-management: start_only
+  mail:
+    host: imap.gmail.com
+    port: 993
+    protocol: imaps
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail.store.protocol: imaps
+      mail.imap.ssl.enable: true
+      mail.debug: true
+
