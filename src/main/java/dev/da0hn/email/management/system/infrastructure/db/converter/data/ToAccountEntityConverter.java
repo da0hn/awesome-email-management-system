@@ -16,7 +16,8 @@ public class ToAccountEntityConverter implements Converter<Account, AccountEntit
     public AccountEntity convert(final Account source) {
         return AccountEntity.builder()
             .id(source.id())
-            .username(source.accountCredentials().username())
+            .name(source.name())
+            .email(source.accountCredentials().email())
             .password(source.accountCredentials().password())
             .host(source.emailConnectionDetails().host())
             .port(source.emailConnectionDetails().port())

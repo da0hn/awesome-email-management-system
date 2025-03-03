@@ -19,6 +19,8 @@ public class Account implements Serializable {
 
     private final UUID id;
 
+    private final String name;
+
     private final LocalDateTime createdAt;
 
     private final LocalDateTime updatedAt;
@@ -31,6 +33,10 @@ public class Account implements Serializable {
 
     public UUID id() {
         return this.id;
+    }
+
+    public String name() {
+        return this.name;
     }
 
     public LocalDateTime createdAt() {

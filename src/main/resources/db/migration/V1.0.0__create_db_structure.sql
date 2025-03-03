@@ -1,7 +1,8 @@
 create table accounts
 (
     id         uuid         not null default gen_random_uuid(),
-    username   varchar(128) not null,
+    name  varchar(128) not null,
+    email varchar(128) not null,
     password   varchar(256) not null,
     created_at timestamp    not null default now(),
     updated_at timestamp    not null default now(),
@@ -12,7 +13,7 @@ create table accounts
     constraint pk_account primary key (id)
 );
 
-create index idx_accounts_username on accounts using btree (username);
+create index idx_accounts_username on accounts using btree (email);
 
 create index idx_accounts_rules on accounts using gin (rules);
 create index idx_accounts_rules_name on accounts using btree ((rules ->> 'name'));

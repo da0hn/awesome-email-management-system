@@ -18,9 +18,10 @@ public class ToAccountConverter implements Converter<AccountEntity, Account> {
     public Account convert(final AccountEntity source) {
         return Account.builder()
             .id(source.getId())
+            .name(source.getName())
             .accountCredentials(
                 AccountCredentials.builder()
-                    .username(source.getUsername())
+                    .email(source.getEmail())
                     .password(source.getPassword())
                     .build()
             )

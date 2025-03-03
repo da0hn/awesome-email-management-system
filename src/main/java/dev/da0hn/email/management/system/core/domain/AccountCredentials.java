@@ -12,17 +12,17 @@ public class AccountCredentials implements Serializable {
     @Serial
     private static final long serialVersionUID = -2235376574903307288L;
 
-    private final String username;
+    private final String email;
 
     private final String password;
 
-    public AccountCredentials(final String username, final String password) {
-        this.username = username;
+    public AccountCredentials(final String email, final String password) {
+        this.email = email;
         this.password = password;
     }
 
-    public String username() {
-        return this.username;
+    public String email() {
+        return this.email;
     }
 
     public String password() {
@@ -32,7 +32,7 @@ public class AccountCredentials implements Serializable {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("username", this.username)
+            .append("email", this.email)
             .append("password", this.password)
             .toString();
     }

@@ -22,8 +22,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 @Setter
 @Getter
@@ -42,16 +40,17 @@ public class AccountEntity implements Serializable, DataLayerEntity {
     @Column(nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @CreatedDate
+    @Column(nullable = false, name = "name")
+    private String name;
+
     @Column(nullable = false, name = "created_at")
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false, name = "username")
-    private String username;
+    @Column(nullable = false, name = "email")
+    private String email;
 
     @Column(nullable = false, name = "password")
     private String password;
