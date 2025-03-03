@@ -11,6 +11,7 @@ import dev.da0hn.email.management.system.core.domain.RuleAction;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -22,20 +23,21 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 })
 @Getter
 @SuperBuilder
+@NoArgsConstructor
 @AllArgsConstructor
 public abstract class RuleJson {
 
     @NotNull(message = "Rule ID is required")
     @JsonProperty(value = "rule_id", required = true)
-    private final UUID ruleId;
+    private UUID ruleId;
 
-    private final String name;
+    private String name;
 
-    private final String description;
+    private String description;
 
-    private final RuleAction action;
+    private RuleAction action;
 
-    private final List<RuleCriteriaJson> criteria;
+    private List<RuleCriteriaJson> criteria;
 
     @Override
     public int hashCode() {
