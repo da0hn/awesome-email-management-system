@@ -3,6 +3,9 @@ package dev.da0hn.email.management.system.core.domain;
 import java.io.Serial;
 import java.io.Serializable;
 
+import lombok.Builder;
+
+@Builder
 public class EmailConnectionDetails implements Serializable {
 
     @Serial

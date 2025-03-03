@@ -1,8 +1,12 @@
 package dev.da0hn.email.management.system.core.domain;
 
+import java.util.UUID;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class RuleCriteria {
+
+    private final UUID id;
 
     private final String value;
 
@@ -10,7 +14,8 @@ public class RuleCriteria {
 
     private final RuleCriteriaOperator operator;
 
-    public RuleCriteria(final String value, final RuleCriteriaType type, final RuleCriteriaOperator operator) {
+    public RuleCriteria(final UUID id, final String value, final RuleCriteriaType type, final RuleCriteriaOperator operator) {
+        this.id = id;
         this.value = value;
         this.type = type;
         this.operator = operator;
@@ -26,6 +31,10 @@ public class RuleCriteria {
 
     public RuleCriteriaOperator operator() {
         return this.operator;
+    }
+
+    public UUID id() {
+        return this.id;
     }
 
     @Override

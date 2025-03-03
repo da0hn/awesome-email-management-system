@@ -1,10 +1,13 @@
 package dev.da0hn.email.management.system.core.domain;
 
 import java.io.Serial;
+import java.util.Set;
 import java.util.UUID;
 
+import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+@SuperBuilder
 public final class MoveEmailRule extends Rule {
 
     @Serial
@@ -19,9 +22,10 @@ public final class MoveEmailRule extends Rule {
         final String name,
         final String description,
         final String sourceFolder,
-        final String targetFolder
+        final String targetFolder,
+        final Set<RuleCriteria> criteria
     ) {
-        super(id, name, description, RuleAction.MOVE);
+        super(id, name, description, RuleAction.MOVE, criteria);
         this.sourceFolder = sourceFolder;
         this.targetFolder = targetFolder;
     }

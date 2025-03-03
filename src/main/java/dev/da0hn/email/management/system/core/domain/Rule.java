@@ -2,10 +2,15 @@ package dev.da0hn.email.management.system.core.domain;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
+import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+@SuperBuilder
 public abstract sealed class Rule implements Serializable permits ArchiveEmailRule, DeleteEmailRule, MoveEmailRule {
 
     @Serial
@@ -19,11 +24,20 @@ public abstract sealed class Rule implements Serializable permits ArchiveEmailRu
 
     private final RuleAction action;
 
-    protected Rule(final UUID id, final String name, final String description, final RuleAction action) {
+    private final Set<RuleCriteria> criteria;
+
+    protected Rule(
+        final UUID id,
+        final String name,
+        final String description,
+        final RuleAction action,
+        final Set<RuleCriteria> criteria
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.action = action;
+        this.criteria = new HashSet<>(criteria);
     }
 
     public UUID id() {
@@ -36,6 +50,14 @@ public abstract sealed class Rule implements Serializable permits ArchiveEmailRu
 
     public String description() {
         return this.description;
+    }
+
+    public RuleAction action() {
+        return this.action;
+    }
+
+    public Set<RuleCriteria> criteria() {
+        return Collections.unmodifiableSet(this.criteria);
     }
 
     @Override

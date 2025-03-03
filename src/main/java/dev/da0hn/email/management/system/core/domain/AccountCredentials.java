@@ -3,8 +3,10 @@ package dev.da0hn.email.management.system.core.domain;
 import java.io.Serial;
 import java.io.Serializable;
 
+import lombok.Builder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+@Builder
 public class AccountCredentials implements Serializable {
 
     @Serial
