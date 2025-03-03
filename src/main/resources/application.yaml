@@ -1,8 +1,8 @@
 spring:
   application:
-    name: email-manager-system
+    name: email-management-system
   datasource:
-    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/email_manager_system
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/email_management_system
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -24,4 +24,6 @@ spring:
       mail.store.protocol: imaps
       mail.imap.ssl.enable: true
       mail.debug: true
+  jpa:
+    open-in-view: false
 

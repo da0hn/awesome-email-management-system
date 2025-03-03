@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>dev.da0hn</groupId>
-    <artifactId>email-manager-system</artifactId>
-    <version>0.1.0</version>
-    <name>email-manager-system</name>
-    <description>email-manager-system</description>
+    <artifactId>email-management-system</artifactId>
+    <version>1.0.0</version>
+    <name>email-management-system</name>
+    <description>email-management-system</description>
     <url/>
     <licenses>
         <license/>
