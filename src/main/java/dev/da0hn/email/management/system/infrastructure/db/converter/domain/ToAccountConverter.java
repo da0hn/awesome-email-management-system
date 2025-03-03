@@ -1,0 +1,41 @@
+package dev.da0hn.email.management.system.infrastructure.db.converter.domain;
+
+import dev.da0hn.email.management.system.core.domain.Account;
+import dev.da0hn.email.management.system.core.domain.AccountCredentials;
+import dev.da0hn.email.management.system.core.domain.EmailConnectionDetails;
+import dev.da0hn.email.management.system.infrastructure.db.entities.AccountEntity;
+import dev.da0hn.email.management.system.shared.annotations.Mapper;
+import lombok.AllArgsConstructor;
+import org.springframework.core.convert.converter.Converter;
+
+@Mapper
+@AllArgsConstructor
+public class ToAccountConverter implements Converter<AccountEntity, Account> {
+
+    private final ToRuleConverter toRuleConverter;
+
+    @Override
+    public Account convert(final AccountEntity source) {
+        return Account.builder()
+            .id(source.getId())
+            .accountCredentials(
+                AccountCredentials.builder()
+                    .username(source.getUsername())
+                    .password(source.getPassword())
+                    .build()
+            )
+            .emailConnectionDetails(
+                EmailConnectionDetails.builder()
+                    .host(source.getHost())
+                    .port(source.getPort())
+                    .build()
+            )
+            .rules(
+                source.getRules().stream()
+                    .map(this.toRuleConverter::convert)
+                    .toList()
+            )
+            .build();
+    }
+
+}
