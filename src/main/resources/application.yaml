@@ -27,3 +27,6 @@ spring:
   jpa:
     open-in-view: false
 
+app:
+  encryption:
+    key: ${ENCRYPTION_KEY:MySecretKey123}
