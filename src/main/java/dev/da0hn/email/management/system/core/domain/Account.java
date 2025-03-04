@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -55,8 +57,8 @@ public class Account implements Serializable {
         return this.emailConnectionDetails;
     }
 
-    public List<Rule> rules() {
-        return Collections.unmodifiableList(this.rules);
+    public Set<Rule> rules() {
+        return Collections.unmodifiableSet(this.rules);
     }
 
 }

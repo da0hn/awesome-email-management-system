@@ -1,5 +1,7 @@
 package dev.da0hn.email.management.system.infrastructure.db.converter.domain;
 
+import java.util.stream.Collectors;
+
 import dev.da0hn.email.management.system.core.domain.Account;
 import dev.da0hn.email.management.system.core.domain.AccountCredentials;
 import dev.da0hn.email.management.system.core.domain.EmailConnectionDetails;
@@ -34,7 +36,7 @@ public class ToAccountConverter implements Converter<AccountEntity, Account> {
             .rules(
                 source.getRules().stream()
                     .map(this.toRuleConverter::convert)
-                    .toList()
+                    .collect(Collectors.toSet())
             )
             .build();
     }
