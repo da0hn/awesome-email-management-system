@@ -4,11 +4,11 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountInput;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
@@ -31,7 +31,26 @@ public class Account implements Serializable {
 
     private final EmailConnectionDetails emailConnectionDetails;
 
-    private final List<Rule> rules;
+    private final Set<Rule> rules;
+
+    public static Account newAccount(final NewAccountInput input) {
+        return Account.builder()
+            .id(UUID.randomUUID())
+            .name(input.name())
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .accountCredentials(AccountCredentials.builder()
+                                    .email(input.credentials().email())
+                                    .password(input.credentials().password())
+                                    .build())
+            .emailConnectionDetails(EmailConnectionDetails.builder()
+                                        .host(input.connectionDetails().host())
+                                        .port(input.connectionDetails().port())
+                                        .protocol(input.connectionDetails().protocol())
+                                        .build())
+            .rules(new HashSet<>())
+            .build();
+    }
 
     public UUID id() {
         return this.id;
