@@ -11,7 +11,7 @@ public interface PasswordEncryption {
      *
      * @param rawPassword the password to encrypt
      * @return the encrypted password
-     * @throws IllegalArgumentException if rawPassword is null
+     * @throws IllegalArgumentException if rawPassword is null or empty
      */
     String encrypt(String rawPassword);
 
@@ -20,7 +20,7 @@ public interface PasswordEncryption {
      *
      * @param encryptedPassword the password to decrypt
      * @return the decrypted password
-     * @throws IllegalArgumentException if encryptedPassword is null
+     * @throws IllegalArgumentException if encryptedPassword is null or empty
      */
     String decrypt(String encryptedPassword);
 

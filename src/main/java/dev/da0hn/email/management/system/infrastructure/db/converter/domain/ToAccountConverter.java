@@ -31,6 +31,7 @@ public class ToAccountConverter implements Converter<AccountEntity, Account> {
                 EmailConnectionDetails.builder()
                     .host(source.getHost())
                     .port(source.getPort())
+                    .protocol(source.getProtocol())
                     .build()
             )
             .rules(

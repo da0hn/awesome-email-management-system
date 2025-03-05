@@ -25,33 +25,30 @@ class PasswordEncryptionTest {
     })
     void shouldEncryptAndDecryptPassword(String originalPassword) {
         final var encrypted = this.passwordEncryptionImpl.encrypt(originalPassword);
-
         assertThat(encrypted).isNotEqualTo(originalPassword);
 
         final var decrypted = this.passwordEncryptionImpl.decrypt(encrypted);
-
         assertThat(decrypted).isEqualTo(originalPassword);
     }
 
     @Test
     void shouldGenerateSameEncryptedValueForSamePassword() {
         final var password = "password123";
-
         final var encrypted1 = this.passwordEncryptionImpl.encrypt(password);
         final var encrypted2 = this.passwordEncryptionImpl.encrypt(password);
 
         assertThat(encrypted1).isEqualTo(encrypted2);
-        assertThat(this.passwordEncryptionImpl.decrypt(encrypted1)).isEqualTo(password);
+
+        final var decrypted = this.passwordEncryptionImpl.decrypt(encrypted1);
+        assertThat(decrypted).isEqualTo(password);
     }
 
     @Test
-    void shouldHandleEmptyPassword() {
-        final var password = "";
-
-        final var encrypted = this.passwordEncryptionImpl.encrypt(password);
-        final var decrypted = this.passwordEncryptionImpl.decrypt(encrypted);
-
-        assertThat(decrypted).isEqualTo(password);
+    void shouldThrowExceptionForEmptyPassword() {
+        org.junit.jupiter.api.Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> this.passwordEncryptionImpl.encrypt("")
+        );
     }
 
     @Test

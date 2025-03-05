@@ -1,10 +1,11 @@
 package dev.da0hn.email.management.system.infrastructure.log;
 
+import dev.da0hn.email.management.system.core.domain.SensitiveData;
+import dev.da0hn.email.management.system.core.ports.spi.LoggerFacade;
+
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import dev.da0hn.email.management.system.core.ports.spi.LoggerFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +59,21 @@ public class LoggerFacadeImpl implements LoggerFacade {
 
     @Override
     public LoggerFacade parameter(final String param, final Object value) {
-        this.parameters.put(param, value);
+        this.parameters.put(param, maskSensitiveData(value));
         return this;
+    }
+
+    private Object maskSensitiveData(final Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof char[]) {
+            return "[PROTECTED]";
+        }
+        if (value instanceof SensitiveData) {
+            return value.toString(); // SensitiveData implementations should mask data in toString()
+        }
+        return value;
     }
 
     /**
@@ -86,7 +100,7 @@ public class LoggerFacadeImpl implements LoggerFacade {
 
         if (!this.parameters.isEmpty()) {
             final var result = this.parameters.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .map(entry -> entry.getKey() + ": " + maskSensitiveData(entry.getValue()))
                 .collect(Collectors.joining(", ", "(", ")"));
             logMessage.append("[PARAMS: ").append(result).append("] ");
         }

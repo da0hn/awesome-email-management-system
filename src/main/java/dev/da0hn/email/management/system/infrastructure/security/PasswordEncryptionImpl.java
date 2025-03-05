@@ -33,14 +33,20 @@ public class PasswordEncryptionImpl implements PasswordEncryption {
     }
 
     public String encrypt(final String rawPassword) {
-        if (rawPassword == null) {
-            throw new IllegalArgumentException("Password cannot be null");
+        if (rawPassword == null || rawPassword.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
         }
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, this.key);
-            byte[] encryptedBytes = cipher.doFinal(rawPassword.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(encryptedBytes);
+            byte[] passwordBytes = rawPassword.getBytes(StandardCharsets.UTF_8);
+            try {
+                byte[] encryptedBytes = cipher.doFinal(passwordBytes);
+                return Base64.getEncoder().encodeToString(encryptedBytes);
+            } finally {
+                // Clear the byte array containing the password
+                Arrays.fill(passwordBytes, (byte) 0);
+            }
         }
         catch (Exception e) {
             throw new RuntimeException("Error encrypting password", e);
@@ -48,14 +54,19 @@ public class PasswordEncryptionImpl implements PasswordEncryption {
     }
 
     public String decrypt(final String encryptedPassword) {
-        if (encryptedPassword == null) {
-            throw new IllegalArgumentException("Encrypted password cannot be null");
+        if (encryptedPassword == null || encryptedPassword.isEmpty()) {
+            throw new IllegalArgumentException("Encrypted password cannot be null or empty");
         }
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, this.key);
             byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedPassword));
-            return new String(decryptedBytes, StandardCharsets.UTF_8);
+            try {
+                return new String(decryptedBytes, StandardCharsets.UTF_8);
+            } finally {
+                // Clear the byte array containing the decrypted password
+                Arrays.fill(decryptedBytes, (byte) 0);
+            }
         }
         catch (Exception e) {
             throw new RuntimeException("Error decrypting password", e);
