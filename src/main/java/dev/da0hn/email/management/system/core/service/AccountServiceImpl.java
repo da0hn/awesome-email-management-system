@@ -85,7 +85,7 @@ public class AccountServiceImpl implements AccountService {
             input
         );
 
-        final var updatedRules = new HashSet<Rule>(account.rules());
+        final var updatedRules = new HashSet<>(account.rules());
         updatedRules.add(rule);
         final var updatedAccount = Account.builder()
             .id(account.id())
