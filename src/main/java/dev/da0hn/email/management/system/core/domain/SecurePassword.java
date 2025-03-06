@@ -1,12 +1,16 @@
 package dev.da0hn.email.management.system.core.domain;
 
-
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * A secure password container that properly handles sensitive password data.
  * This class ensures that password data is cleared from memory when no longer needed.
  */
-public final class SecurePassword implements SensitiveData {
+public final class SecurePassword implements SensitiveData, Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1155881813828605161L;
 
     private final String encryptedPassword;
 
