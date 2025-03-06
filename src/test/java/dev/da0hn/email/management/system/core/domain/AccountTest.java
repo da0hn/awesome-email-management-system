@@ -5,6 +5,7 @@ import dev.da0hn.email.management.system.core.ports.spi.PasswordEncryption;
 import dev.da0hn.email.management.system.core.service.PasswordEncryptionService;
 import dev.da0hn.email.management.system.infrastructure.security.PasswordEncryptionImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,6 +22,7 @@ class AccountTest {
     }
 
     @Test
+    @DisplayName("Deve criar nova conta com senha criptografada")
     void shouldCreateNewAccountWithEncryptedPassword() {
         final var rawPassword = "password123";
         final var input = new NewAccountInput(
@@ -42,6 +44,7 @@ class AccountTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando a senha segura é nula")
     void shouldThrowExceptionWhenSecurePasswordIsNull() {
         final var input = new NewAccountInput(
             "John Doe",

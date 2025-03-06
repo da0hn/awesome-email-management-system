@@ -15,6 +15,7 @@ import dev.da0hn.email.management.system.core.ports.api.dto.RuleCriteriaOutput;
 import dev.da0hn.email.management.system.infrastructure.web.error.GlobalExceptionHandler;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -52,6 +53,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve criar uma nova conta com sucesso")
   void shouldCreateNewAccount() throws Exception {
       final var jsonContent = """
           {
@@ -96,6 +98,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve retornar erro quando o email é inválido")
   void shouldReturnErrorWhenEmailIsInvalid() throws Exception {
       final var jsonContent = """
           {
@@ -126,6 +129,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve retornar erro quando a senha é muito curta")
   void shouldReturnErrorWhenPasswordIsTooShort() throws Exception {
       final var jsonContent = """
           {
@@ -156,6 +160,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve retornar erro quando a porta é inválida")
   void shouldReturnErrorWhenPortIsInvalid() throws Exception {
       final var jsonContent = """
           {
@@ -186,6 +191,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve retornar erro quando o protocolo é inválido")
   void shouldReturnErrorWhenProtocolIsInvalid() throws Exception {
       final var jsonContent = """
           {
@@ -216,6 +222,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve criar uma regra de movimentação com sucesso")
   void shouldCreateMoveRuleSuccessfully() throws Exception {
       final var accountId = UUID.randomUUID();
       final var input = new NewRuleInput(
@@ -262,6 +269,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve criar uma regra de exclusão com sucesso")
   void shouldCreateDeleteRuleSuccessfully() throws Exception {
       final var accountId = UUID.randomUUID();
       final var input = new NewRuleInput(
@@ -308,6 +316,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve criar uma regra de arquivamento com sucesso")
   void shouldCreateArchiveRuleSuccessfully() throws Exception {
       final var accountId = UUID.randomUUID();
       final var input = new NewRuleInput(
@@ -354,6 +363,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve retornar erro quando a conta não é encontrada")
   void shouldReturnErrorWhenAccountNotFound() throws Exception {
       final var accountId = UUID.randomUUID();
       final var input = new NewRuleInput(
@@ -383,6 +393,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve retornar erro quando campos obrigatórios da regra estão faltando")
   void shouldReturnErrorWhenRuleRequiredFieldsAreMissing() throws Exception {
       final var accountId = UUID.randomUUID();
       final var jsonContent = """
@@ -407,6 +418,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve retornar erro quando o critério é inválido")
   void shouldReturnErrorWhenCriteriaIsInvalid() throws Exception {
       final var accountId = UUID.randomUUID();
       final var input = new NewRuleInput(
@@ -434,6 +446,7 @@ class AccountControllerTest {
   }
 
   @Test
+  @DisplayName("Deve retornar erro quando a configuração da regra de movimentação está faltando")
   void shouldReturnErrorWhenMoveRuleConfigurationIsMissing() throws Exception {
       final var accountId = UUID.randomUUID();
       final var input = new NewRuleInput(

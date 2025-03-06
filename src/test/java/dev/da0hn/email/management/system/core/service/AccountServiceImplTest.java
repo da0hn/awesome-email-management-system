@@ -67,7 +67,7 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("should create account and return non-sensitive data")
+    @DisplayName("Deve criar conta e retornar dados não sensíveis")
     void shouldCreateAccountAndReturnNonSensitiveData() {
         final var rawPassword = "password123";
         final var input = new NewAccountInput(
@@ -110,8 +110,8 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("should create move rule successfully")
-    void test1() {
+    @DisplayName("Deve criar regra de movimentação com sucesso")
+    void shouldCreateMoveRuleSuccessfully() {
         final var accountId = UUID.randomUUID();
         final var account = createTestAccount(accountId);
 
@@ -150,8 +150,8 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("should create delete rule successfully")
-    void test2() {
+    @DisplayName("Deve criar regra de exclusão com sucesso")
+    void shouldCreateDeleteRuleSuccessfully() {
         final var accountId = UUID.randomUUID();
         final var account = createTestAccount(accountId);
 
@@ -190,8 +190,8 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("should create archive rule successfully")
-    void test3() {
+    @DisplayName("Deve criar regra de arquivamento com sucesso")
+    void shouldCreateArchiveRuleSuccessfully() {
         final var accountId = UUID.randomUUID();
         final var account = createTestAccount(accountId);
 
@@ -230,8 +230,8 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw exception when account not found")
-    void test4() {
+    @DisplayName("Deve lançar exceção quando a conta não é encontrada")
+    void shouldThrowExceptionWhenAccountNotFound() {
         final var accountId = UUID.randomUUID();
         when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 

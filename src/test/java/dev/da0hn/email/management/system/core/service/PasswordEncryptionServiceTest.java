@@ -3,6 +3,7 @@ package dev.da0hn.email.management.system.core.service;
 import dev.da0hn.email.management.system.core.ports.spi.PasswordEncryption;
 import dev.da0hn.email.management.system.infrastructure.security.PasswordEncryptionImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +21,7 @@ class PasswordEncryptionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve criptografar senha e retornar senha segura")
     void shouldEncryptPasswordAndReturnSecurePassword() {
         final var rawPassword = "password123";
 
@@ -30,6 +32,7 @@ class PasswordEncryptionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve descriptografar senha e retornar valor original")
     void shouldDecryptPasswordAndReturnOriginalValue() {
         final var originalPassword = "password123";
         final var securePassword = this.service.encrypt(originalPassword);

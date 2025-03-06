@@ -3,6 +3,7 @@ package dev.da0hn.email.management.system.core.domain;
 import dev.da0hn.email.management.system.core.ports.spi.PasswordEncryption;
 import dev.da0hn.email.management.system.infrastructure.security.PasswordEncryptionImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AccountCredentialsTest {
 
     @Test
+    @DisplayName("Deve criar credenciais de conta com senha criptografada")
     void shouldCreateAccountCredentialsWithEncryptedPassword() {
         final var email = "test@example.com";
         final var encryptedPassword = "encrypted_password_123";
@@ -25,6 +27,7 @@ class AccountCredentialsTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando o email é nulo")
     void shouldThrowExceptionWhenEmailIsNull() {
         assertThatThrownBy(() -> AccountCredentials.builder()
             .email(null)
@@ -35,6 +38,7 @@ class AccountCredentialsTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando a senha é nula")
     void shouldThrowExceptionWhenPasswordIsNull() {
         assertThatThrownBy(() -> AccountCredentials.builder()
             .email("test@example.com")
@@ -45,6 +49,7 @@ class AccountCredentialsTest {
     }
 
     @Test
+    @DisplayName("Não deve expor a senha no método toString")
     void shouldNotExposePasswordInToString() {
         final var credentials = AccountCredentials.builder()
             .email("test@example.com")

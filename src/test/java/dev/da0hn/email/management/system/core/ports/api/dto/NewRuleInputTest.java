@@ -27,8 +27,8 @@ class NewRuleInputTest {
     }
 
     @Test
-    @DisplayName("should validate move rule with valid configuration")
-    void test1() {
+    @DisplayName("Deve validar regra de movimentação com configuração válida")
+    void shouldValidateMoveRuleWithValidConfiguration() {
         var input = new NewRuleInput(
             UUID.randomUUID(),
             "Move to Archive",
@@ -48,8 +48,8 @@ class NewRuleInputTest {
     }
 
     @Test
-    @DisplayName("should validate move rule with missing move configuration")
-    void test2() {
+    @DisplayName("Deve validar regra de movimentação com configuração de movimentação ausente")
+    void shouldValidateMoveRuleWithMissingMoveConfiguration() {
         var input = new NewRuleInput(
             UUID.randomUUID(),
             "Move to Archive",
@@ -72,8 +72,8 @@ class NewRuleInputTest {
     }
 
     @Test
-    @DisplayName("should validate non-move rule with move configuration")
-    void test3() {
+    @DisplayName("Deve validar regra que não é de movimentação com configuração de movimentação")
+    void shouldValidateNonMoveRuleWithMoveConfiguration() {
         var input = new NewRuleInput(
             UUID.randomUUID(),
             "Delete Old Emails",
@@ -96,8 +96,8 @@ class NewRuleInputTest {
     }
 
     @Test
-    @DisplayName("should validate required fields")
-    void test4() {
+    @DisplayName("Deve validar campos obrigatórios")
+    void shouldValidateRequiredFields() {
         var input = new NewRuleInput(
             null,
             "",
