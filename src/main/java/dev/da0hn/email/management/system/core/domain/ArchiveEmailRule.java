@@ -16,4 +16,8 @@ public final class ArchiveEmailRule extends Rule {
         super(id, name, description, RuleAction.ARCHIVE, criteria);
     }
 
+    public static ArchiveEmailRule newRule(final UUID id, final String name, final String description, final Set<RuleCriteria> criteria) {
+        return new ArchiveEmailRule(id, name, description, criteria);
+    }
+
 }

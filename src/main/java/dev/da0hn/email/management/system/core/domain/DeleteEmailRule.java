@@ -16,4 +16,8 @@ public final class DeleteEmailRule extends Rule {
         super(id, name, description, RuleAction.DELETE, criteria);
     }
 
+    public static DeleteEmailRule newRule(final UUID id, final String name, final String description, final Set<RuleCriteria> criteria) {
+        return new DeleteEmailRule(id, name, description, criteria);
+    }
+
 }

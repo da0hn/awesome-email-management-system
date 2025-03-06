@@ -8,17 +8,16 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-public record ValidationErrorResponse(
+public record ErrorResponse(
     LocalDateTime timestamp,
     int status,
     String error,
     String message,
     String path,
-    List<FieldError> fieldErrors
+    List<Error> errors
 ) {
     @Builder
-    public record FieldError(
-        String field,
+    public record Error(
         String message
     ) {}
 }

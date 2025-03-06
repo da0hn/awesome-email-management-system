@@ -46,4 +46,15 @@ public final class MoveEmailRule extends Rule {
             .toString();
     }
 
+    public static MoveEmailRule newRule(
+        final UUID id,
+        final String name,
+        final String description,
+        final String sourceFolder,
+        final String targetFolder,
+        final Set<RuleCriteria> criteria
+    ) {
+        return new MoveEmailRule(id, name, description, sourceFolder, targetFolder, criteria);
+    }
+
 }
