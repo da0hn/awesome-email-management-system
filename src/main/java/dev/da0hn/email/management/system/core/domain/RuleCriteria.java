@@ -1,10 +1,15 @@
 package dev.da0hn.email.management.system.core.domain;
 
-import java.util.UUID;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class RuleCriteria {
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.UUID;
+
+public class RuleCriteria implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -8042461158945083661L;
 
     private final UUID id;
 
