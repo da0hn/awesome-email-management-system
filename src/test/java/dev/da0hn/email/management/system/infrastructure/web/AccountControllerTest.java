@@ -5,6 +5,9 @@ import dev.da0hn.email.management.system.core.domain.RuleAction;
 import dev.da0hn.email.management.system.core.domain.RuleCriteriaOperator;
 import dev.da0hn.email.management.system.core.domain.RuleCriteriaType;
 import dev.da0hn.email.management.system.core.ports.api.AccountService;
+import dev.da0hn.email.management.system.core.ports.api.dto.AccountOutput;
+import dev.da0hn.email.management.system.core.ports.api.dto.DetailedAccountOutput;
+import dev.da0hn.email.management.system.core.ports.api.dto.DetailedRuleOutput;
 import dev.da0hn.email.management.system.core.ports.api.dto.MoveRuleInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountOutput;
@@ -22,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -32,6 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -473,6 +478,128 @@ class AccountControllerTest {
           .andExpect(jsonPath("$.errors[0].message").value("Move rule configuration is required for MOVE action"));
   }
 
+  @Test
+  @DisplayName("Should return list of all accounts")
+  void shouldReturnListOfAllAccounts() throws Exception {
+    // given
+    final var now = LocalDateTime.now();
+    final var account1 = new AccountOutput(
+      UUID.randomUUID(),
+      "Account 1",
+      "account1@test.com",
+      "imap.test.com",
+      993,
+      "imap",
+      now,
+      now,
+      0
+    );
+    final var account2 = new AccountOutput(
+      UUID.randomUUID(),
+      "Account 2",
+      "account2@test.com",
+      "imap.test.com",
+      993,
+      "imap",
+      now,
+      now,
+      2
+    );
+    when(this.accountService.findAll()).thenReturn(List.of(account1, account2));
 
+    // when / then
+    this.mockMvc.perform(get("/api/v1/accounts"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isArray())
+      .andExpect(jsonPath("$", hasSize(2)))
+      .andExpect(jsonPath("$[0].id").value(account1.id().toString()))
+      .andExpect(jsonPath("$[0].name").value(account1.name()))
+      .andExpect(jsonPath("$[0].email").value(account1.email()))
+      .andExpect(jsonPath("$[0].host").value(account1.host()))
+      .andExpect(jsonPath("$[0].port").value(account1.port()))
+      .andExpect(jsonPath("$[0].protocol").value(account1.protocol()))
+      .andExpect(jsonPath("$[0].totalRules").value(account1.totalRules()))
+      .andExpect(jsonPath("$[1].id").value(account2.id().toString()))
+      .andExpect(jsonPath("$[1].name").value(account2.name()))
+      .andExpect(jsonPath("$[1].email").value(account2.email()))
+      .andExpect(jsonPath("$[1].host").value(account2.host()))
+      .andExpect(jsonPath("$[1].port").value(account2.port()))
+      .andExpect(jsonPath("$[1].protocol").value(account2.protocol()))
+      .andExpect(jsonPath("$[1].totalRules").value(account2.totalRules()));
+  }
+
+  @Test
+  @DisplayName("Should return account when found by id")
+  void shouldReturnAccountWhenFoundById() throws Exception {
+    // given
+    final var id = UUID.randomUUID();
+    final var now = LocalDateTime.now();
+    final var rule = new DetailedRuleOutput(
+      UUID.randomUUID(),
+      "Test Rule",
+      "Test Description",
+      RuleAction.MOVE,
+      Set.of(new RuleCriteriaOutput(
+        UUID.randomUUID(),
+        "test@example.com",
+        RuleCriteriaType.FROM,
+        RuleCriteriaOperator.EQUALS
+      )),
+      "INBOX",
+      "Archive"
+    );
+    final var account = new DetailedAccountOutput(
+      id,
+      "Test Account",
+      "test@test.com",
+      "imap.test.com",
+      993,
+      "imap",
+      now,
+      now,
+      Set.of(rule)
+    );
+    when(this.accountService.findById(id)).thenReturn(account);
+
+    // when / then
+    this.mockMvc.perform(get("/api/v1/accounts/{id}", id))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.id").value(account.id().toString()))
+      .andExpect(jsonPath("$.name").value(account.name()))
+      .andExpect(jsonPath("$.email").value(account.email()))
+      .andExpect(jsonPath("$.host").value(account.host()))
+      .andExpect(jsonPath("$.port").value(account.port()))
+      .andExpect(jsonPath("$.protocol").value(account.protocol()))
+      .andExpect(jsonPath("$.rules").isArray())
+      .andExpect(jsonPath("$.rules", hasSize(1)))
+      .andExpect(jsonPath("$.rules[0].id").value(rule.id().toString()))
+      .andExpect(jsonPath("$.rules[0].name").value(rule.name()))
+      .andExpect(jsonPath("$.rules[0].description").value(rule.description()))
+      .andExpect(jsonPath("$.rules[0].action").value(rule.action().toString()))
+      .andExpect(jsonPath("$.rules[0].sourceFolder").value(rule.sourceFolder()))
+      .andExpect(jsonPath("$.rules[0].targetFolder").value(rule.targetFolder()))
+      .andExpect(jsonPath("$.rules[0].criteria").isArray())
+      .andExpect(jsonPath("$.rules[0].criteria", hasSize(1)))
+      .andExpect(jsonPath("$.rules[0].criteria[0].value").value("test@example.com"))
+      .andExpect(jsonPath("$.rules[0].criteria[0].type").value("FROM"))
+      .andExpect(jsonPath("$.rules[0].criteria[0].operator").value("EQUALS"));
+  }
+
+  @Test
+  @DisplayName("Should return 404 when account not found by id")
+  void shouldReturn404WhenAccountNotFoundById() throws Exception {
+    // given
+    final var id = UUID.randomUUID();
+    when(this.accountService.findById(id)).thenThrow(new EntityNotFoundException("Account not found"));
+
+    // when / then
+    this.mockMvc.perform(get("/api/v1/accounts/{id}", id))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(404))
+      .andExpect(jsonPath("$.error").value("Not Found"))
+      .andExpect(jsonPath("$.message").value("Resource not found"))
+      .andExpect(jsonPath("$.errors", hasSize(1)))
+      .andExpect(jsonPath("$.errors[0].message").value("Account not found"));
+  }
 
 }

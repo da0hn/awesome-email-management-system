@@ -1,5 +1,7 @@
 package dev.da0hn.email.management.system.core.ports.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -10,7 +12,9 @@ public record NewAccountOutput(
     UUID id,
     String name,
     String email,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime createdAt,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime updatedAt,
     int totalRules
 ) {

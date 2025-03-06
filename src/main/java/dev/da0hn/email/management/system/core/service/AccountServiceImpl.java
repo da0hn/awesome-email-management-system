@@ -8,6 +8,8 @@ import dev.da0hn.email.management.system.core.domain.Rule;
 import dev.da0hn.email.management.system.core.domain.RuleAction;
 import dev.da0hn.email.management.system.core.domain.RuleCriteria;
 import dev.da0hn.email.management.system.core.ports.api.AccountService;
+import dev.da0hn.email.management.system.core.ports.api.dto.AccountOutput;
+import dev.da0hn.email.management.system.core.ports.api.dto.DetailedAccountOutput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountOutput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewRuleInput;
@@ -19,6 +21,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -114,6 +117,33 @@ public class AccountServiceImpl implements AccountService {
             case DELETE -> DeleteEmailRule.newRule(id, name, description, criteria);
             case MOVE -> MoveEmailRule.newRule(id, name, description, input.moveRule().sourceFolder(), input.moveRule().targetFolder(), criteria);
         };
+    }
+
+    @Override
+    public List<AccountOutput> findAll() {
+        LoggerFacade.instance()
+            .where(this)
+            .method("findAll")
+            .what("Retrieving all accounts")
+            .log();
+
+        return this.accountRepository.findAll().stream()
+            .map(AccountOutput::of)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public DetailedAccountOutput findById(final UUID id) {
+        LoggerFacade.instance()
+            .where(this)
+            .method("findById")
+            .what("Retrieving account by id")
+            .parameter("id", id)
+            .log();
+
+        return this.accountRepository.findById(id)
+            .map(DetailedAccountOutput::of)
+            .orElseThrow(() -> new EntityNotFoundException("Account not found"));
     }
 
 }

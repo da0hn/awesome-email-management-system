@@ -1,6 +1,8 @@
 package dev.da0hn.email.management.system.infrastructure.web;
 
 import dev.da0hn.email.management.system.core.ports.api.AccountService;
+import dev.da0hn.email.management.system.core.ports.api.dto.AccountOutput;
+import dev.da0hn.email.management.system.core.ports.api.dto.DetailedAccountOutput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountOutput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewRuleInput;
@@ -8,6 +10,7 @@ import dev.da0hn.email.management.system.core.ports.api.dto.NewRuleOutput;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -40,6 +44,18 @@ public class AccountController {
       throw new IllegalArgumentException("Account ID in path must match Account ID in request body");
     }
     return this.accountService.createRule(input);
+  }
+
+  @GetMapping
+  @ResponseStatus(HttpStatus.OK)
+  public List<AccountOutput> findAll() {
+    return this.accountService.findAll();
+  }
+
+  @GetMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public DetailedAccountOutput findById(@PathVariable final UUID id) {
+    return this.accountService.findById(id);
   }
 
 }

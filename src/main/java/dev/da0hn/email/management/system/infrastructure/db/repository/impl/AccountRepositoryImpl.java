@@ -10,8 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
@@ -34,6 +36,14 @@ public class AccountRepositoryImpl implements AccountRepository {
     public Optional<Account> findById(final UUID id) {
         return this.accountJpaRepository.findById(id)
             .map(entity -> this.entityConverter.toDomain(entity, Account.class));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Account> findAll() {
+        return this.accountJpaRepository.findAll().stream()
+            .map(entity -> this.entityConverter.toDomain(entity, Account.class))
+            .collect(Collectors.toList());
     }
 
 }
