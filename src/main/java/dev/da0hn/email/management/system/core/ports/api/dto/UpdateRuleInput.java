@@ -13,7 +13,9 @@ import java.util.Set;
 import java.util.UUID;
 
 @ValidRule
-public record NewRuleInput(
+public record UpdateRuleInput(
+    @NotNull(message = "ID da regra é obrigatório")
+    UUID ruleId,
     @NotNull(message = "ID da conta é obrigatório")
     UUID accountId,
     @NotBlank(message = "Nome da regra é obrigatório")

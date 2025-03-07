@@ -7,12 +7,15 @@ import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountOutput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewRuleInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewRuleOutput;
+import dev.da0hn.email.management.system.core.ports.api.dto.UpdateRuleInput;
+import dev.da0hn.email.management.system.core.ports.api.dto.UpdateRuleOutput;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -54,8 +57,21 @@ public class AccountController {
 
   @GetMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public DetailedAccountOutput findById(@PathVariable final UUID id) {
-    return this.accountService.findById(id);
-  }
+    public DetailedAccountOutput findById(@PathVariable final UUID id) {
+        return this.accountService.findById(id);
+    }
+
+    @PutMapping("/{accountId}/rules/{ruleId}")
+    @ResponseStatus(HttpStatus.OK)
+    public UpdateRuleOutput updateRule(
+        @PathVariable final UUID accountId,
+        @PathVariable final UUID ruleId,
+        @RequestBody @Valid final UpdateRuleInput input
+    ) {
+        if (!accountId.equals(input.accountId()) || !ruleId.equals(input.ruleId())) {
+            throw new IllegalArgumentException("Account ID and Rule ID in path must match IDs in request body");
+        }
+        return this.accountService.updateRule(input);
+    }
 
 }

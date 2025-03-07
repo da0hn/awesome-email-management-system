@@ -68,7 +68,7 @@ class NewRuleInputTest {
         assertThat(violations)
             .hasSize(1)
             .element(0)
-            .hasFieldOrPropertyWithValue("message", "Move rule configuration is required for MOVE action");
+            .hasFieldOrPropertyWithValue("message", "Configuração de movimentação é obrigatória para ação MOVE");
     }
 
     @Test
@@ -92,7 +92,7 @@ class NewRuleInputTest {
         assertThat(violations)
             .hasSize(1)
             .element(0)
-            .hasFieldOrPropertyWithValue("message", "Move rule configuration is only allowed for MOVE action");
+            .hasFieldOrPropertyWithValue("message", "Configuração de movimentação é permitida apenas para ação MOVE");
     }
 
     @Test
@@ -113,12 +113,12 @@ class NewRuleInputTest {
             .hasSize(6)
             .extracting("message")
             .containsExactlyInAnyOrder(
-                "Account ID is required",
-                "Rule name is required",
-                "Rule name must be between 3 and 50 characters",
-                "Rule description is required",
-                "Rule action is required",
-                "At least one criteria is required"
+                "ID da conta é obrigatório",
+                "Nome da regra é obrigatório",
+                "Nome da regra deve ter entre 3 e 50 caracteres",
+                "Descrição da regra é obrigatória",
+                "Ação da regra é obrigatória",
+                "Pelo menos um critério é obrigatório"
             );
     }
 }

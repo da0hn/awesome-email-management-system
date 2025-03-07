@@ -7,13 +7,17 @@ import dev.da0hn.email.management.system.core.domain.MoveEmailRule;
 import dev.da0hn.email.management.system.core.domain.Rule;
 import dev.da0hn.email.management.system.core.domain.RuleAction;
 import dev.da0hn.email.management.system.core.domain.RuleCriteria;
+import dev.da0hn.email.management.system.core.domain.RuleUpdateVisitor;
 import dev.da0hn.email.management.system.core.ports.api.AccountService;
 import dev.da0hn.email.management.system.core.ports.api.dto.AccountOutput;
 import dev.da0hn.email.management.system.core.ports.api.dto.DetailedAccountOutput;
+import dev.da0hn.email.management.system.core.ports.api.dto.MoveRuleInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountOutput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewRuleInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewRuleOutput;
+import dev.da0hn.email.management.system.core.ports.api.dto.UpdateRuleInput;
+import dev.da0hn.email.management.system.core.ports.api.dto.UpdateRuleOutput;
 import dev.da0hn.email.management.system.core.ports.spi.AccountRepository;
 import dev.da0hn.email.management.system.core.ports.spi.LoggerFacade;
 import jakarta.persistence.EntityNotFoundException;
@@ -79,13 +83,13 @@ public class AccountServiceImpl implements AccountService {
             ))
             .collect(Collectors.toSet());
 
-        final var rule = createRuleByAction(
+        final var rule = this.createNewRule(
             UUID.randomUUID(),
             input.name(),
             input.description(),
             input.action(),
             criteria,
-            input
+            input.moveRule()
         );
 
         final var updatedRules = new HashSet<>(account.rules());
@@ -104,19 +108,38 @@ public class AccountServiceImpl implements AccountService {
         return NewRuleOutput.of(rule);
     }
 
-    private Rule createRuleByAction(
+    private Rule createNewRule(
         final UUID id,
         final String name,
         final String description,
         final RuleAction action,
         final Set<RuleCriteria> criteria,
-        final NewRuleInput input
+        final MoveRuleInput moveRule
     ) {
         return switch (action) {
             case ARCHIVE -> ArchiveEmailRule.newRule(id, name, description, criteria);
             case DELETE -> DeleteEmailRule.newRule(id, name, description, criteria);
-            case MOVE -> MoveEmailRule.newRule(id, name, description, input.moveRule().sourceFolder(), input.moveRule().targetFolder(), criteria);
+            case MOVE -> MoveEmailRule.newRule(id, name, description, moveRule.sourceFolder(), moveRule.targetFolder(), criteria);
         };
+    }
+
+    private Rule updateRule(
+        final Rule existingRule,
+        final String name,
+        final String description,
+        final Set<RuleCriteria> criteria,
+        final MoveRuleInput moveRule
+    ) {
+        return moveRule != null
+            ? RuleUpdateVisitor.updateMove(
+                existingRule,
+                name,
+                description,
+                criteria,
+                moveRule.sourceFolder(),
+                moveRule.targetFolder()
+            )
+            : RuleUpdateVisitor.update(existingRule, name, description, criteria);
     }
 
     @Override
@@ -130,6 +153,59 @@ public class AccountServiceImpl implements AccountService {
         return this.accountRepository.findAll().stream()
             .map(AccountOutput::of)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public UpdateRuleOutput updateRule(final UpdateRuleInput input) {
+        LoggerFacade.instance()
+            .where(this)
+            .method("updateRule")
+            .what("Updating rule")
+            .parameter("input", input)
+            .log();
+
+        final var account = this.accountRepository.findById(input.accountId())
+            .orElseThrow(() -> new EntityNotFoundException("Account not found"));
+
+        final var existingRule = account.rules().stream()
+            .filter(rule -> rule.id().equals(input.ruleId()))
+            .findFirst()
+            .orElseThrow(() -> new EntityNotFoundException("Rule not found"));
+
+        final var criteria = input.criteria().stream()
+            .map(criteriaInput -> new RuleCriteria(
+                UUID.randomUUID(),
+                criteriaInput.value(),
+                criteriaInput.type(),
+                criteriaInput.operator()
+            ))
+            .collect(Collectors.toSet());
+
+        final var updatedRule = this.updateRule(
+            existingRule,
+            input.name(),
+            input.description(),
+            criteria,
+            input.moveRule()
+        );
+
+        final var updatedRules = new HashSet<>(account.rules());
+        updatedRules.remove(existingRule);
+        updatedRules.add(updatedRule);
+
+        final var updatedAccount = Account.builder()
+            .id(account.id())
+            .name(account.name())
+            .createdAt(account.createdAt())
+            .updatedAt(account.updatedAt())
+            .accountCredentials(account.accountCredentials())
+            .emailConnectionDetails(account.emailConnectionDetails())
+            .rules(updatedRules)
+            .build();
+
+        this.accountRepository.save(updatedAccount);
+
+        return UpdateRuleOutput.of(updatedRule);
     }
 
     @Override

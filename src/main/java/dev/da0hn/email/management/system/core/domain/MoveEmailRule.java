@@ -1,11 +1,12 @@
 package dev.da0hn.email.management.system.core.domain;
 
-import java.io.Serial;
-import java.util.Set;
-import java.util.UUID;
-
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.io.Serial;
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.UUID;
 
 @SuperBuilder
 public final class MoveEmailRule extends Rule {
@@ -17,15 +18,17 @@ public final class MoveEmailRule extends Rule {
 
     private final String targetFolder;
 
-    public MoveEmailRule(
+    protected MoveEmailRule(
         final UUID id,
         final String name,
         final String description,
         final String sourceFolder,
         final String targetFolder,
-        final Set<RuleCriteria> criteria
+        final Set<RuleCriteria> criteria,
+        final LocalDateTime createdAt,
+        final LocalDateTime updatedAt
     ) {
-        super(id, name, description, RuleAction.MOVE, criteria);
+        super(id, name, description, RuleAction.MOVE, criteria, createdAt, updatedAt);
         this.sourceFolder = sourceFolder;
         this.targetFolder = targetFolder;
     }
@@ -36,6 +39,11 @@ public final class MoveEmailRule extends Rule {
 
     public String targetFolder() {
         return this.targetFolder;
+    }
+
+    @Override
+    public <T> T accept(final RuleVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override
@@ -54,7 +62,20 @@ public final class MoveEmailRule extends Rule {
         final String targetFolder,
         final Set<RuleCriteria> criteria
     ) {
-        return new MoveEmailRule(id, name, description, sourceFolder, targetFolder, criteria);
+        final var now = LocalDateTime.now();
+        return new MoveEmailRule(id, name, description, sourceFolder, targetFolder, criteria, now, now);
+    }
+
+    public static MoveEmailRule updateRule(
+        final UUID id,
+        final String name,
+        final String description,
+        final String sourceFolder,
+        final String targetFolder,
+        final Set<RuleCriteria> criteria,
+        final LocalDateTime createdAt
+    ) {
+        return new MoveEmailRule(id, name, description, sourceFolder, targetFolder, criteria, createdAt, LocalDateTime.now());
     }
 
 }

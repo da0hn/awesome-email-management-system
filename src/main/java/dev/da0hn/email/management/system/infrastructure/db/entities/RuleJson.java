@@ -1,5 +1,6 @@
 package dev.da0hn.email.management.system.infrastructure.db.entities;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -39,6 +40,12 @@ public abstract class RuleJson {
 
     private List<RuleCriteriaJson> criteria;
 
+    @JsonProperty(value = "created_at")
+    private LocalDateTime createdAt;
+
+    @JsonProperty(value = "updated_at")
+    private LocalDateTime updatedAt;
+
     @Override
     public int hashCode() {
         return Objects.hashCode(this.ruleId);
@@ -60,6 +67,8 @@ public abstract class RuleJson {
             .append("description", this.description)
             .append("action", this.action)
             .append("criteria", this.criteria)
+            .append("createdAt", this.createdAt)
+            .append("updatedAt", this.updatedAt)
             .toString();
     }
 

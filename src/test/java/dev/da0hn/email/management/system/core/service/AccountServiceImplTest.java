@@ -3,6 +3,7 @@ package dev.da0hn.email.management.system.core.service;
 import dev.da0hn.email.management.system.core.domain.Account;
 import dev.da0hn.email.management.system.core.domain.AccountCredentials;
 import dev.da0hn.email.management.system.core.domain.EmailConnectionDetails;
+import dev.da0hn.email.management.system.core.domain.MoveEmailRule;
 import dev.da0hn.email.management.system.core.domain.RuleAction;
 import dev.da0hn.email.management.system.core.domain.RuleCriteriaOperator;
 import dev.da0hn.email.management.system.core.domain.RuleCriteriaType;
@@ -11,6 +12,8 @@ import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewAccountOutput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewRuleCriteriaInput;
 import dev.da0hn.email.management.system.core.ports.api.dto.NewRuleInput;
+import dev.da0hn.email.management.system.core.ports.api.dto.UpdateRuleInput;
+import dev.da0hn.email.management.system.core.ports.api.dto.UpdateRuleOutput;
 import dev.da0hn.email.management.system.core.ports.spi.AccountRepository;
 import dev.da0hn.email.management.system.core.ports.spi.PasswordEncryption;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -230,7 +234,333 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção quando a conta não é encontrada")
+    @DisplayName("Should update move rule successfully")
+    void shouldUpdateMoveRuleSuccessfully() {
+        // given
+        final var accountId = UUID.randomUUID();
+        final var account = createTestAccount(accountId);
+        final var existingRule = account.rules().iterator().next();
+
+        final var input = new UpdateRuleInput(
+            existingRule.id(),
+            accountId,
+            "Updated Rule Name",
+            "Updated Rule Description",
+            RuleAction.MOVE,
+            Set.of(
+                new NewRuleCriteriaInput(
+                    "updated value",
+                    RuleCriteriaType.SUBJECT,
+                    RuleCriteriaOperator.CONTAINS
+                )
+            ),
+            new MoveRuleInput(
+                "updated/source/folder",
+                "updated/target/folder"
+            )
+        );
+
+        when(this.accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        doAnswer(invocation -> invocation.getArgument(0)).when(this.accountRepository).save(any(Account.class));
+
+        // when
+        final var output = this.accountService.updateRule(input);
+
+        // then
+        assertThat(output.id()).isEqualTo(existingRule.id());
+        assertThat(output.name()).isEqualTo(input.name());
+        assertThat(output.description()).isEqualTo(input.description());
+        assertThat(output.action()).isEqualTo(input.action());
+        assertThat(output.createdAt()).isEqualTo(existingRule.createdAt());
+        assertThat(output.updatedAt()).isAfter(existingRule.updatedAt());
+
+        verify(this.accountRepository).save(argThat(updatedAccount ->
+            updatedAccount.rules().stream()
+                .anyMatch(rule ->
+                    rule.id().equals(existingRule.id()) &&
+                    rule.name().equals(input.name()) &&
+                    rule.description().equals(input.description()) &&
+                    rule.action().equals(input.action())
+                )
+        ));
+    }
+
+    @Test
+    @DisplayName("Should update archive rule successfully")
+    void shouldUpdateArchiveRuleSuccessfully() {
+        // given
+        final var accountId = UUID.randomUUID();
+        final var account = createTestAccount(accountId);
+        final var existingRule = account.rules().iterator().next();
+
+        final var input = new UpdateRuleInput(
+            existingRule.id(),
+            accountId,
+            "Updated Archive Rule",
+            "Updated Archive Rule Description",
+            RuleAction.ARCHIVE,
+            Set.of(
+                new NewRuleCriteriaInput(
+                    "updated value",
+                    RuleCriteriaType.SUBJECT,
+                    RuleCriteriaOperator.CONTAINS
+                )
+            ),
+            null
+        );
+
+        when(this.accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        doAnswer(invocation -> invocation.getArgument(0)).when(this.accountRepository).save(any(Account.class));
+
+        // when
+        final var output = this.accountService.updateRule(input);
+
+        // then
+        assertThat(output.id()).isEqualTo(existingRule.id());
+        assertThat(output.name()).isEqualTo(input.name());
+        assertThat(output.description()).isEqualTo(input.description());
+        assertThat(output.action()).isEqualTo(input.action());
+        assertThat(output.createdAt()).isEqualTo(existingRule.createdAt());
+        assertThat(output.updatedAt()).isAfter(existingRule.updatedAt());
+
+        verify(this.accountRepository).save(argThat(updatedAccount ->
+            updatedAccount.rules().stream()
+                .anyMatch(rule ->
+                    rule.id().equals(existingRule.id()) &&
+                    rule.name().equals(input.name()) &&
+                    rule.description().equals(input.description()) &&
+                    rule.action().equals(input.action())
+                )
+        ));
+    }
+
+    @Test
+    @DisplayName("Should update delete rule successfully")
+    void shouldUpdateDeleteRuleSuccessfully() {
+        // given
+        final var accountId = UUID.randomUUID();
+        final var account = createTestAccount(accountId);
+        final var existingRule = account.rules().iterator().next();
+
+        final var input = new UpdateRuleInput(
+            existingRule.id(),
+            accountId,
+            "Updated Delete Rule",
+            "Updated Delete Rule Description",
+            RuleAction.DELETE,
+            Set.of(
+                new NewRuleCriteriaInput(
+                    "updated value",
+                    RuleCriteriaType.SUBJECT,
+                    RuleCriteriaOperator.CONTAINS
+                )
+            ),
+            null
+        );
+
+        when(this.accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        doAnswer(invocation -> invocation.getArgument(0)).when(this.accountRepository).save(any(Account.class));
+
+        // when
+        final var output = this.accountService.updateRule(input);
+
+        // then
+        assertThat(output.id()).isEqualTo(existingRule.id());
+        assertThat(output.name()).isEqualTo(input.name());
+        assertThat(output.description()).isEqualTo(input.description());
+        assertThat(output.action()).isEqualTo(input.action());
+        assertThat(output.createdAt()).isEqualTo(existingRule.createdAt());
+        assertThat(output.updatedAt()).isAfter(existingRule.updatedAt());
+
+        verify(this.accountRepository).save(argThat(updatedAccount ->
+            updatedAccount.rules().stream()
+                .anyMatch(rule ->
+                    rule.id().equals(existingRule.id()) &&
+                    rule.name().equals(input.name()) &&
+                    rule.description().equals(input.description()) &&
+                    rule.action().equals(input.action())
+                )
+        ));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when rule not found")
+    void shouldThrowExceptionWhenRuleNotFound() {
+        // given
+        final var accountId = UUID.randomUUID();
+        final var nonExistentRuleId = UUID.randomUUID();
+        final var account = createTestAccount(accountId);
+
+        final var input = new UpdateRuleInput(
+            nonExistentRuleId,
+            accountId,
+            "Updated Rule Name",
+            "Updated Rule Description",
+            RuleAction.MOVE,
+            Set.of(
+                new NewRuleCriteriaInput(
+                    "updated value",
+                    RuleCriteriaType.SUBJECT,
+                    RuleCriteriaOperator.CONTAINS
+                )
+            ),
+            new MoveRuleInput(
+                "updated/source/folder",
+                "updated/target/folder"
+            )
+        );
+
+        when(this.accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+
+        // when/then
+        assertThatThrownBy(() -> this.accountService.updateRule(input))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessage("Rule not found");
+    }
+
+    @Test
+    @DisplayName("Should update move rule with new folders")
+    void shouldUpdateMoveRuleWithNewFolders() {
+        // given
+        final var accountId = UUID.randomUUID();
+        final var account = createTestAccount(accountId);
+        final var existingRule = account.rules().iterator().next();
+
+        final var input = new UpdateRuleInput(
+            existingRule.id(),
+            accountId,
+            "Updated Name",
+            "Updated Description",
+            RuleAction.MOVE,
+            Set.of(
+                new NewRuleCriteriaInput(
+                    "updated value",
+                    RuleCriteriaType.SUBJECT,
+                    RuleCriteriaOperator.CONTAINS
+                )
+            ),
+            new MoveRuleInput(
+                "updated/source",
+                "updated/target"
+            )
+        );
+
+        when(this.accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        doAnswer(invocation -> invocation.getArgument(0)).when(this.accountRepository).save(any(Account.class));
+
+        // when
+        final var output = this.accountService.updateRule(input);
+
+        // then
+        assertThat(output)
+            .satisfies(result -> {
+                assertThat(result.id()).isEqualTo(existingRule.id());
+                assertThat(result.name()).isEqualTo("Updated Name");
+                assertThat(result.description()).isEqualTo("Updated Description");
+                assertThat(result.action()).isEqualTo(RuleAction.MOVE);
+                assertThat(result.createdAt()).isEqualTo(existingRule.createdAt());
+                assertThat(result.updatedAt()).isAfter(existingRule.updatedAt());
+                assertThat(result.criteria())
+                    .hasSize(1)
+                    .allSatisfy(criteria -> {
+                        assertThat(criteria.value()).isEqualTo("updated value");
+                        assertThat(criteria.type()).isEqualTo(RuleCriteriaType.SUBJECT);
+                        assertThat(criteria.operator()).isEqualTo(RuleCriteriaOperator.CONTAINS);
+                    });
+            });
+
+        verify(this.accountRepository).save(argThat(updatedAccount ->
+            updatedAccount.rules().stream()
+                .filter(rule -> rule.id().equals(existingRule.id()))
+                .findFirst()
+                .map(rule -> rule instanceof MoveEmailRule moveRule &&
+                    moveRule.name().equals("Updated Name") &&
+                    moveRule.description().equals("Updated Description") &&
+                    moveRule.action().equals(RuleAction.MOVE) &&
+                    moveRule.sourceFolder().equals("updated/source") &&
+                    moveRule.targetFolder().equals("updated/target") &&
+                    moveRule.criteria().stream()
+                        .allMatch(criteria ->
+                            criteria.value().equals("updated value") &&
+                            criteria.type().equals(RuleCriteriaType.SUBJECT) &&
+                            criteria.operator().equals(RuleCriteriaOperator.CONTAINS)
+                        )
+                )
+                .orElse(false)
+        ));
+    }
+
+    @Test
+    @DisplayName("Should update move rule without changing folders")
+    void shouldUpdateMoveRuleWithoutChangingFolders() {
+        // given
+        final var accountId = UUID.randomUUID();
+        final var account = createTestAccount(accountId);
+        final var existingRule = account.rules().iterator().next();
+
+        final var input = new UpdateRuleInput(
+            existingRule.id(),
+            accountId,
+            "Updated Name",
+            "Updated Description",
+            RuleAction.MOVE,
+            Set.of(
+                new NewRuleCriteriaInput(
+                    "updated value",
+                    RuleCriteriaType.SUBJECT,
+                    RuleCriteriaOperator.CONTAINS
+                )
+            ),
+            null
+        );
+
+        when(this.accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        doAnswer(invocation -> invocation.getArgument(0)).when(this.accountRepository).save(any(Account.class));
+
+        // when
+        final var output = this.accountService.updateRule(input);
+
+        // then
+        assertThat(output)
+            .satisfies(result -> {
+                assertThat(result.id()).isEqualTo(existingRule.id());
+                assertThat(result.name()).isEqualTo("Updated Name");
+                assertThat(result.description()).isEqualTo("Updated Description");
+                assertThat(result.action()).isEqualTo(RuleAction.MOVE);
+                assertThat(result.createdAt()).isEqualTo(existingRule.createdAt());
+                assertThat(result.updatedAt()).isAfter(existingRule.updatedAt());
+                assertThat(result.criteria())
+                    .hasSize(1)
+                    .allSatisfy(criteria -> {
+                        assertThat(criteria.value()).isEqualTo("updated value");
+                        assertThat(criteria.type()).isEqualTo(RuleCriteriaType.SUBJECT);
+                        assertThat(criteria.operator()).isEqualTo(RuleCriteriaOperator.CONTAINS);
+                    });
+            });
+
+        verify(this.accountRepository).save(argThat(updatedAccount ->
+            updatedAccount.rules().stream()
+                .filter(rule -> rule.id().equals(existingRule.id()))
+                .findFirst()
+                .map(rule -> rule instanceof MoveEmailRule moveRule &&
+                    moveRule.name().equals("Updated Name") &&
+                    moveRule.description().equals("Updated Description") &&
+                    moveRule.action().equals(RuleAction.MOVE) &&
+                    moveRule.sourceFolder().equals(((MoveEmailRule) existingRule).sourceFolder()) &&
+                    moveRule.targetFolder().equals(((MoveEmailRule) existingRule).targetFolder()) &&
+                    moveRule.criteria().stream()
+                        .allMatch(criteria ->
+                            criteria.value().equals("updated value") &&
+                            criteria.type().equals(RuleCriteriaType.SUBJECT) &&
+                            criteria.operator().equals(RuleCriteriaOperator.CONTAINS)
+                        )
+                )
+                .orElse(false)
+        ));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when account not found")
     void shouldThrowExceptionWhenAccountNotFound() {
         final var accountId = UUID.randomUUID();
         when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
