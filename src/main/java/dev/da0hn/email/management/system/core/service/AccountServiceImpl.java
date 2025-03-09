@@ -222,4 +222,38 @@ public class AccountServiceImpl implements AccountService {
             .orElseThrow(() -> new EntityNotFoundException("Account not found"));
     }
 
+    @Override
+    public void deleteRule(final UUID accountId, final UUID ruleId) {
+        LoggerFacade.instance()
+            .where(this)
+            .method("deleteRule")
+            .what("Deleting rule from account")
+            .parameter("accountId", accountId)
+            .parameter("ruleId", ruleId)
+            .log();
+
+        final var account = this.accountRepository.findById(accountId)
+            .orElseThrow(() -> new EntityNotFoundException("Account not found"));
+
+        final var ruleToDelete = account.rules().stream()
+            .filter(rule -> rule.id().equals(ruleId))
+            .findFirst()
+            .orElseThrow(() -> new EntityNotFoundException("Rule not found"));
+
+        final var updatedRules = new HashSet<>(account.rules());
+        updatedRules.remove(ruleToDelete);
+
+        final var updatedAccount = Account.builder()
+            .id(account.id())
+            .name(account.name())
+            .createdAt(account.createdAt())
+            .updatedAt(account.updatedAt())
+            .accountCredentials(account.accountCredentials())
+            .emailConnectionDetails(account.emailConnectionDetails())
+            .rules(updatedRules)
+            .build();
+
+        this.accountRepository.save(updatedAccount);
+    }
+
 }

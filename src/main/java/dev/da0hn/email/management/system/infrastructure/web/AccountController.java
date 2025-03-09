@@ -12,6 +12,7 @@ import dev.da0hn.email.management.system.core.ports.api.dto.UpdateRuleOutput;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,6 +73,15 @@ public class AccountController {
             throw new IllegalArgumentException("Account ID and Rule ID in path must match IDs in request body");
         }
         return this.accountService.updateRule(input);
+    }
+
+    @DeleteMapping("/{accountId}/rules/{ruleId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteRule(
+        @PathVariable final UUID accountId,
+        @PathVariable final UUID ruleId
+    ) {
+        this.accountService.deleteRule(accountId, ruleId);
     }
 
 }

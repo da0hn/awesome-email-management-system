@@ -36,8 +36,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -600,6 +602,60 @@ class AccountControllerTest {
       .andExpect(jsonPath("$.message").value("Resource not found"))
       .andExpect(jsonPath("$.errors", hasSize(1)))
       .andExpect(jsonPath("$.errors[0].message").value("Account not found"));
+  }
+
+  @Test
+  @DisplayName("Deve remover regra de uma conta com sucesso")
+  void shouldDeleteRuleSuccessfully() throws Exception {
+    // given
+    final var accountId = UUID.randomUUID();
+    final var ruleId = UUID.randomUUID();
+
+    // when / then
+    this.mockMvc.perform(delete("/api/v1/accounts/{accountId}/rules/{ruleId}", accountId, ruleId))
+      .andExpect(status().isNoContent());
+
+    verify(this.accountService).deleteRule(accountId, ruleId);
+  }
+
+  @Test
+  @DisplayName("Deve retornar 404 quando conta não for encontrada ao remover regra")
+  void shouldReturn404WhenAccountNotFoundOnDeleteRule() throws Exception {
+    // given
+    final var accountId = UUID.randomUUID();
+    final var ruleId = UUID.randomUUID();
+
+    org.mockito.Mockito.doThrow(new EntityNotFoundException("Account not found"))
+      .when(this.accountService).deleteRule(accountId, ruleId);
+
+    // when / then
+    this.mockMvc.perform(delete("/api/v1/accounts/{accountId}/rules/{ruleId}", accountId, ruleId))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(404))
+      .andExpect(jsonPath("$.error").value("Not Found"))
+      .andExpect(jsonPath("$.message").value("Resource not found"))
+      .andExpect(jsonPath("$.errors", hasSize(1)))
+      .andExpect(jsonPath("$.errors[0].message").value("Account not found"));
+  }
+
+  @Test
+  @DisplayName("Deve retornar 404 quando regra não for encontrada ao remover regra")
+  void shouldReturn404WhenRuleNotFoundOnDeleteRule() throws Exception {
+    // given
+    final var accountId = UUID.randomUUID();
+    final var ruleId = UUID.randomUUID();
+
+    org.mockito.Mockito.doThrow(new EntityNotFoundException("Rule not found"))
+      .when(this.accountService).deleteRule(accountId, ruleId);
+
+    // when / then
+    this.mockMvc.perform(delete("/api/v1/accounts/{accountId}/rules/{ruleId}", accountId, ruleId))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(404))
+      .andExpect(jsonPath("$.error").value("Not Found"))
+      .andExpect(jsonPath("$.message").value("Resource not found"))
+      .andExpect(jsonPath("$.errors", hasSize(1)))
+      .andExpect(jsonPath("$.errors[0].message").value("Rule not found"));
   }
 
 }

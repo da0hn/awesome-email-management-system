@@ -24,4 +24,6 @@ public interface AccountService {
 
     UpdateRuleOutput updateRule(UpdateRuleInput input);
 
+    void deleteRule(UUID accountId, UUID ruleId);
+
 }

@@ -625,4 +625,56 @@ class AccountServiceImplTest {
             .isInstanceOf(EntityNotFoundException.class)
             .hasMessage("Account not found");
     }
+
+    @Test
+    @DisplayName("Deve remover regra de uma conta com sucesso")
+    void shouldDeleteRuleSuccessfully() {
+        // given
+        final var accountId = UUID.randomUUID();
+        final var account = this.createTestAccount(accountId, RuleAction.ARCHIVE);
+        final var existingRule = account.rules().iterator().next();
+
+        when(this.accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        doAnswer(invocation -> invocation.getArgument(0)).when(this.accountRepository).save(any(Account.class));
+
+        // when
+        this.accountService.deleteRule(accountId, existingRule.id());
+
+        // then
+        verify(this.accountRepository).save(argThat(updatedAccount ->
+            updatedAccount.rules().stream()
+                .noneMatch(rule -> rule.id().equals(existingRule.id()))
+        ));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar remover regra de conta inexistente")
+    void shouldThrowExceptionWhenAccountNotFoundOnDeleteRule() {
+        // given
+        final var accountId = UUID.randomUUID();
+        final var ruleId = UUID.randomUUID();
+
+        when(this.accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+        // when/then
+        assertThatThrownBy(() -> this.accountService.deleteRule(accountId, ruleId))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessage("Account not found");
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar remover regra inexistente")
+    void shouldThrowExceptionWhenRuleNotFoundOnDeleteRule() {
+        // given
+        final var accountId = UUID.randomUUID();
+        final var account = this.createTestAccount(accountId, RuleAction.ARCHIVE);
+        final var nonExistingRuleId = UUID.randomUUID();
+
+        when(this.accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+
+        // when/then
+        assertThatThrownBy(() -> this.accountService.deleteRule(accountId, nonExistingRuleId))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessage("Rule not found");
+    }
 }
