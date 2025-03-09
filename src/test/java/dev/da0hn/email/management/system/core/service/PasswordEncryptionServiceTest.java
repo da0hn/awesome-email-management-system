@@ -43,6 +43,7 @@ class PasswordEncryptionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando criptografar senha nula")
     void shouldThrowExceptionWhenEncryptingNullPassword() {
         assertThatThrownBy(() -> this.service.encrypt(null))
             .isInstanceOf(IllegalArgumentException.class)
@@ -50,6 +51,7 @@ class PasswordEncryptionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando criptografar senha vazia")
     void shouldThrowExceptionWhenEncryptingEmptyPassword() {
         assertThatThrownBy(() -> this.service.encrypt(""))
             .isInstanceOf(IllegalArgumentException.class)
@@ -57,6 +59,7 @@ class PasswordEncryptionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando descriptografar senha nula")
     void shouldThrowExceptionWhenDecryptingNullPassword() {
         assertThatThrownBy(() -> this.service.decrypt(null))
             .isInstanceOf(IllegalArgumentException.class)
@@ -64,6 +67,7 @@ class PasswordEncryptionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando descriptografar senha vazia")
     void shouldThrowExceptionWhenDecryptingEmptyPassword() {
         assertThatThrownBy(() -> this.service.decrypt(""))
             .isInstanceOf(IllegalArgumentException.class)

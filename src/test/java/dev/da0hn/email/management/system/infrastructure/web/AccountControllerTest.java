@@ -415,10 +415,10 @@ class AccountControllerTest {
           .andExpect(jsonPath("$.message").value("Invalid request parameters"))
           .andExpect(jsonPath("$.errors", hasSize(4)))
           .andExpect(jsonPath("$.errors[*].message").value(containsInAnyOrder(
-              "Rule name is required",
-              "Rule description is required",
-              "Rule action is required",
-              "At least one criteria is required"
+              "Nome da regra é obrigatório",
+              "Descrição da regra é obrigatória",
+              "Ação da regra é obrigatória",
+              "Pelo menos um critério é obrigatório"
           )));
   }
 
@@ -475,11 +475,11 @@ class AccountControllerTest {
           .andExpect(jsonPath("$.error").value("Validation Error"))
           .andExpect(jsonPath("$.message").value("Invalid request parameters"))
           .andExpect(jsonPath("$.errors", hasSize(1)))
-          .andExpect(jsonPath("$.errors[0].message").value("Move rule configuration is required for MOVE action"));
+          .andExpect(jsonPath("$.errors[0].message").value("Configuração de movimentação é obrigatória para ação MOVE"));
   }
 
   @Test
-  @DisplayName("Should return list of all accounts")
+  @DisplayName("Deve retornar lista de todas as contas")
   void shouldReturnListOfAllAccounts() throws Exception {
     // given
     final var now = LocalDateTime.now();
@@ -529,7 +529,7 @@ class AccountControllerTest {
   }
 
   @Test
-  @DisplayName("Should return account when found by id")
+  @DisplayName("Deve retornar conta quando encontrada pelo id")
   void shouldReturnAccountWhenFoundById() throws Exception {
     // given
     final var id = UUID.randomUUID();
@@ -586,7 +586,7 @@ class AccountControllerTest {
   }
 
   @Test
-  @DisplayName("Should return 404 when account not found by id")
+  @DisplayName("Deve retornar 404 quando conta não for encontrada pelo id")
   void shouldReturn404WhenAccountNotFoundById() throws Exception {
     // given
     final var id = UUID.randomUUID();

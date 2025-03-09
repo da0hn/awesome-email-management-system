@@ -1,6 +1,7 @@
 package dev.da0hn.email.management.system.infrastructure.security;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,6 +24,7 @@ class PasswordEncryptionTest {
         "short",
         "verylongpasswordwithmorethan30characters"
     })
+    @DisplayName("Deve criptografar e descriptografar senha")
     void shouldEncryptAndDecryptPassword(String originalPassword) {
         final var encrypted = this.passwordEncryptionImpl.encrypt(originalPassword);
         assertThat(encrypted).isNotEqualTo(originalPassword);
@@ -32,6 +34,7 @@ class PasswordEncryptionTest {
     }
 
     @Test
+    @DisplayName("Deve gerar o mesmo valor criptografado para a mesma senha")
     void shouldGenerateSameEncryptedValueForSamePassword() {
         final var password = "password123";
         final var encrypted1 = this.passwordEncryptionImpl.encrypt(password);
@@ -44,6 +47,7 @@ class PasswordEncryptionTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção para senha vazia")
     void shouldThrowExceptionForEmptyPassword() {
         org.junit.jupiter.api.Assertions.assertThrows(
             IllegalArgumentException.class,
@@ -52,6 +56,7 @@ class PasswordEncryptionTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção para senha nula")
     void shouldThrowExceptionForNullPassword() {
         org.junit.jupiter.api.Assertions.assertThrows(
             IllegalArgumentException.class,

@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RuleUpdateVisitorTest {
 
     @Test
-    @DisplayName("Should update move rule with new folders")
+    @DisplayName("Deve atualizar regra de movimentação com novas pastas")
     void shouldUpdateMoveRuleWithNewFolders() {
         // given
         final var id = UUID.randomUUID();
@@ -54,7 +54,7 @@ class RuleUpdateVisitorTest {
     }
 
     @Test
-    @DisplayName("Should update move rule keeping original folders")
+    @DisplayName("Deve atualizar regra de movimentação mantendo pastas originais")
     void shouldUpdateMoveRuleKeepingOriginalFolders() {
         // given
         final var id = UUID.randomUUID();
@@ -94,7 +94,7 @@ class RuleUpdateVisitorTest {
     }
 
     @Test
-    @DisplayName("Should update archive rule")
+    @DisplayName("Deve atualizar regra de arquivamento")
     void shouldUpdateArchiveRule() {
         // given
         final var id = UUID.randomUUID();
@@ -129,7 +129,7 @@ class RuleUpdateVisitorTest {
     }
 
     @Test
-    @DisplayName("Should update delete rule")
+    @DisplayName("Deve atualizar regra de exclusão")
     void shouldUpdateDeleteRule() {
         // given
         final var id = UUID.randomUUID();
