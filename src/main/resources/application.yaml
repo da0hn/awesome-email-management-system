@@ -30,3 +30,8 @@ spring:
 app:
   encryption:
     key: ${ENCRYPTION_KEY:MySecretKey123}
+logging:
+  level:
+    root: info
+    org.springframework: info
+    dev.da0hn.email.management.system: debug
