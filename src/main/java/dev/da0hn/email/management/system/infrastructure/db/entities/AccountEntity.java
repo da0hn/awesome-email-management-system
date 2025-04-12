@@ -1,13 +1,5 @@
 package dev.da0hn.email.management.system.infrastructure.db.entities;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-
-import com.vladmihalcea.hibernate.type.json.JsonType;
 import dev.da0hn.email.management.system.shared.interfaces.DataLayerEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,8 +12,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.type.SqlTypes;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -64,7 +64,8 @@ public class AccountEntity implements Serializable, DataLayerEntity {
     @Column(nullable = false, name = "protocol")
     private String protocol;
 
-    @Type(JsonType.class)
+    // @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, name = "rules", columnDefinition = "jsonb")
     private List<RuleJson> rules;
 
