@@ -39,623 +39,616 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class AccountControllerTest {
 
-  private MockMvc mockMvc;
-  private ObjectMapper objectMapper;
-  private AccountService accountService;
+    private static final int BAD_REQUEST_STATUS = 400;
 
-  @BeforeEach
-  void setUp() {
-      this.accountService = mock(AccountService.class);
-      this.objectMapper = new ObjectMapper();
-      this.mockMvc = MockMvcBuilders
-        .standaloneSetup(new AccountController(accountService))
-        .setControllerAdvice(new GlobalExceptionHandler())
-        .build();
-  }
+    private static final int NOT_FOUND_STATUS = 404;
 
-  @Test
-  @DisplayName("Deve criar uma nova conta com sucesso")
-  void shouldCreateNewAccount() throws Exception {
-      final var jsonContent = """
-          {
-            "name": "John Doe",
-            "credentials": {
-              "email": "john@example.com",
-              "password": "password123"
-            },
-            "connectionDetails": {
-              "host": "smtp.example.com",
-              "port": 587,
-              "protocol": "smtp"
-            }
-          }
-          """;
+    private MockMvc mockMvc;
 
-      final var accountId = UUID.randomUUID();
-      final var now = LocalDateTime.now();
-      final var expectedOutput = new NewAccountOutput(
-          accountId,
-          "John Doe",
-          "john@example.com",
-          now,
-          now,
-          0
-      );
+    private ObjectMapper objectMapper;
 
-      when(accountService.createAccount(any(NewAccountInput.class))).thenReturn(expectedOutput);
+    private AccountService accountService;
 
-      mockMvc.perform(
-          post("/api/v1/accounts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonContent)
-        )
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.id").value(accountId.toString()))
-        .andExpect(jsonPath("$.name").value("John Doe"))
-        .andExpect(jsonPath("$.email").value("john@example.com"))
-        .andExpect(jsonPath("$.totalRules").value(0));
+    @BeforeEach
+    void setUp() {
+        this.accountService = mock(AccountService.class);
+        this.objectMapper = new ObjectMapper();
+        this.mockMvc = MockMvcBuilders
+            .standaloneSetup(new AccountController(this.accountService))
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .build();
+    }
 
-      verify(accountService).createAccount(any(NewAccountInput.class));
-  }
+    @Test
+    @DisplayName("Deve criar uma nova conta com sucesso")
+    void shouldCreateNewAccount() throws Exception {
+        final var jsonContent = """
+                                {
+                                  "name": "John Doe",
+                                  "credentials": {
+                                    "email": "john@example.com",
+                                    "password": "password123"
+                                  },
+                                  "connectionDetails": {
+                                    "host": "smtp.example.com",
+                                    "port": 587,
+                                    "protocol": "smtp"
+                                  }
+                                }
+                                """;
 
-  @Test
-  @DisplayName("Deve retornar erro quando o email é inválido")
-  void shouldReturnErrorWhenEmailIsInvalid() throws Exception {
-      final var jsonContent = """
-          {
-            "name": "John Doe",
-            "credentials": {
-              "email": "invalid-email",
-              "password": "password123"
-            },
-            "connectionDetails": {
-              "host": "smtp.example.com",
-              "port": 587,
-              "protocol": "smtp"
-            }
-          }
-          """;
+        final var accountId = UUID.randomUUID();
+        final var now = LocalDateTime.now();
+        final var expectedOutput = new NewAccountOutput(
+            accountId,
+            "John Doe",
+            "john@example.com",
+            now,
+            now,
+            0
+        );
 
-      mockMvc.perform(
-          post("/api/v1/accounts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonContent)
-        )
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.error").value("Validation Error"))
-        .andExpect(jsonPath("$.message").value("Invalid request parameters"))
-        .andExpect(jsonPath("$.errors", hasSize(1)))
-        .andExpect(jsonPath("$.errors[0].message").value("Invalid email format"));
-  }
+        when(this.accountService.createAccount(any(NewAccountInput.class))).thenReturn(expectedOutput);
 
-  @Test
-  @DisplayName("Deve retornar erro quando a senha é muito curta")
-  void shouldReturnErrorWhenPasswordIsTooShort() throws Exception {
-      final var jsonContent = """
-          {
-            "name": "John Doe",
-            "credentials": {
-              "email": "john@example.com",
-              "password": "123"
-            },
-            "connectionDetails": {
-              "host": "smtp.example.com",
-              "port": 587,
-              "protocol": "smtp"
-            }
-          }
-          """;
+        this.mockMvc.perform(
+                post("/api/v1/accounts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonContent)
+            )
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").value(accountId.toString()))
+            .andExpect(jsonPath("$.name").value("John Doe"))
+            .andExpect(jsonPath("$.email").value("john@example.com"))
+            .andExpect(jsonPath("$.totalRules").value(0));
 
-      mockMvc.perform(
-          post("/api/v1/accounts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonContent)
-        )
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.error").value("Validation Error"))
-        .andExpect(jsonPath("$.message").value("Invalid request parameters"))
-        .andExpect(jsonPath("$.errors", hasSize(1)))
-        .andExpect(jsonPath("$.errors[0].message").value("Password must be at least 8 characters long"));
-  }
+        verify(this.accountService).createAccount(any(NewAccountInput.class));
+    }
 
-  @Test
-  @DisplayName("Deve retornar erro quando a porta é inválida")
-  void shouldReturnErrorWhenPortIsInvalid() throws Exception {
-      final var jsonContent = """
-          {
-            "name": "John Doe",
-            "credentials": {
-              "email": "john@example.com",
-              "password": "password123"
-            },
-            "connectionDetails": {
-              "host": "smtp.example.com",
-              "port": 70000,
-              "protocol": "smtp"
-            }
-          }
-          """;
+    @Test
+    @DisplayName("Deve retornar erro quando o email é inválido")
+    void shouldReturnErrorWhenEmailIsInvalid() throws Exception {
+        final var jsonContent = """
+                                {
+                                  "name": "John Doe",
+                                  "credentials": {
+                                    "email": "invalid-email",
+                                    "password": "password123"
+                                  },
+                                  "connectionDetails": {
+                                    "host": "smtp.example.com",
+                                    "port": 587,
+                                    "protocol": "smtp"
+                                  }
+                                }
+                                """;
 
-      mockMvc.perform(
-          post("/api/v1/accounts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonContent)
-        )
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.error").value("Validation Error"))
-        .andExpect(jsonPath("$.message").value("Invalid request parameters"))
-        .andExpect(jsonPath("$.errors", hasSize(1)))
-        .andExpect(jsonPath("$.errors[0].message").value("Port must be between 1 and 65535"));
-  }
+        this.mockMvc.perform(
+                post("/api/v1/accounts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonContent)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(BAD_REQUEST_STATUS))
+            .andExpect(jsonPath("$.error").value("Validation Error"))
+            .andExpect(jsonPath("$.message").value("Invalid request parameters"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Invalid email format"));
+    }
 
-  @Test
-  @DisplayName("Deve retornar erro quando o protocolo é inválido")
-  void shouldReturnErrorWhenProtocolIsInvalid() throws Exception {
-      final var jsonContent = """
-          {
-            "name": "John Doe",
-            "credentials": {
-              "email": "john@example.com",
-              "password": "password123"
-            },
-            "connectionDetails": {
-              "host": "smtp.example.com",
-              "port": 587,
-              "protocol": "invalid"
-            }
-          }
-          """;
+    @Test
+    @DisplayName("Deve retornar erro quando a senha é muito curta")
+    void shouldReturnErrorWhenPasswordIsTooShort() throws Exception {
+        final var jsonContent = """
+                                {
+                                  "name": "John Doe",
+                                  "credentials": {
+                                    "email": "john@example.com",
+                                    "password": "123"
+                                  },
+                                  "connectionDetails": {
+                                    "host": "smtp.example.com",
+                                    "port": 587,
+                                    "protocol": "smtp"
+                                  }
+                                }
+                                """;
 
-      mockMvc.perform(
-          post("/api/v1/accounts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonContent)
-        )
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.error").value("Validation Error"))
-        .andExpect(jsonPath("$.message").value("Invalid request parameters"))
-        .andExpect(jsonPath("$.errors", hasSize(1)))
-        .andExpect(jsonPath("$.errors[0].message").value("Protocol must be one of: smtp, imap, pop3"));
-  }
+        this.mockMvc.perform(
+                post("/api/v1/accounts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonContent)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(BAD_REQUEST_STATUS))
+            .andExpect(jsonPath("$.error").value("Validation Error"))
+            .andExpect(jsonPath("$.message").value("Invalid request parameters"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Password must be at least 8 characters long"));
+    }
 
-  @Test
-  @DisplayName("Deve criar uma regra de movimentação com sucesso")
-  void shouldCreateMoveRuleSuccessfully() throws Exception {
-      final var accountId = UUID.randomUUID();
-      final var input = new NewRuleInput(
-          accountId,
-          "Move to Archive",
-          "Move emails to archive folder",
-          RuleAction.MOVE,
-          Set.of(new NewRuleCriteriaInput(
-              "test@email.com",
-              RuleCriteriaType.FROM,
-              RuleCriteriaOperator.EQUALS
-          )),
-          new MoveRuleInput("INBOX", "ARCHIVE")
-      );
+    @Test
+    @DisplayName("Deve retornar erro quando a porta é inválida")
+    void shouldReturnErrorWhenPortIsInvalid() throws Exception {
+        final var jsonContent = """
+                                {
+                                  "name": "John Doe",
+                                  "credentials": {
+                                    "email": "john@example.com",
+                                    "password": "password123"
+                                  },
+                                  "connectionDetails": {
+                                    "host": "smtp.example.com",
+                                    "port": 70000,
+                                    "protocol": "smtp"
+                                  }
+                                }
+                                """;
 
-      final var output = new NewRuleOutput(
-          UUID.randomUUID(),
-          input.name(),
-          input.description(),
-          input.action(),
-          input.criteria().stream()
-              .map(criteria -> new RuleCriteriaOutput(
-                  UUID.randomUUID(),
-                  criteria.value(),
-                  criteria.type(),
-                  criteria.operator()
-              ))
-              .collect(Collectors.toSet())
-      );
+        this.mockMvc.perform(
+                post("/api/v1/accounts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonContent)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(BAD_REQUEST_STATUS))
+            .andExpect(jsonPath("$.error").value("Validation Error"))
+            .andExpect(jsonPath("$.message").value("Invalid request parameters"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Port must be between 1 and 65535"));
+    }
 
-      when(accountService.createRule(any())).thenReturn(output);
+    @Test
+    @DisplayName("Deve retornar erro quando o protocolo é inválido")
+    void shouldReturnErrorWhenProtocolIsInvalid() throws Exception {
+        final var jsonContent = """
+                                {
+                                  "name": "John Doe",
+                                  "credentials": {
+                                    "email": "john@example.com",
+                                    "password": "password123"
+                                  },
+                                  "connectionDetails": {
+                                    "host": "smtp.example.com",
+                                    "port": 587,
+                                    "protocol": "invalid"
+                                  }
+                                }
+                                """;
 
-      mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(input)))
-          .andExpect(status().isCreated())
-          .andExpect(jsonPath("$.id").exists())
-          .andExpect(jsonPath("$.name").value(input.name()))
-          .andExpect(jsonPath("$.description").value(input.description()))
-          .andExpect(jsonPath("$.action").value(input.action().name()))
-          .andExpect(jsonPath("$.criteria", hasSize(1)));
+        this.mockMvc.perform(
+                post("/api/v1/accounts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonContent)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(BAD_REQUEST_STATUS))
+            .andExpect(jsonPath("$.error").value("Validation Error"))
+            .andExpect(jsonPath("$.message").value("Invalid request parameters"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Protocol must be one of: smtp, imap, pop3"));
+    }
 
-      verify(accountService).createRule(input);
-  }
+    @Test
+    @DisplayName("Deve criar uma regra de movimentação com sucesso")
+    void shouldCreateMoveRuleSuccessfully() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var input = new NewRuleInput(
+            accountId,
+            "Move to Archive",
+            "Move emails to archive folder",
+            RuleAction.MOVE,
+            Set.of(new NewRuleCriteriaInput(
+                "test@email.com",
+                RuleCriteriaType.FROM,
+                RuleCriteriaOperator.EQUALS
+            )),
+            new MoveRuleInput("INBOX", "ARCHIVE")
+        );
 
-  @Test
-  @DisplayName("Deve criar uma regra de exclusão com sucesso")
-  void shouldCreateDeleteRuleSuccessfully() throws Exception {
-      final var accountId = UUID.randomUUID();
-      final var input = new NewRuleInput(
-          accountId,
-          "Delete Old Emails",
-          "Delete emails older than 30 days",
-          RuleAction.DELETE,
-          Set.of(new NewRuleCriteriaInput(
-              "2024-01-01T00:00:00",
-              RuleCriteriaType.RECEIVED_AT,
-              RuleCriteriaOperator.GREATER_THAN
-          )),
-          null
-      );
+        final var output = new NewRuleOutput(
+            UUID.randomUUID(),
+            input.name(),
+            input.description(),
+            input.action(),
+            input.criteria().stream()
+                .map(criteria -> new RuleCriteriaOutput(
+                    UUID.randomUUID(),
+                    criteria.value(),
+                    criteria.type(),
+                    criteria.operator()
+                ))
+                .collect(Collectors.toSet())
+        );
 
-      final var output = new NewRuleOutput(
-          UUID.randomUUID(),
-          input.name(),
-          input.description(),
-          input.action(),
-          input.criteria().stream()
-              .map(criteria -> new RuleCriteriaOutput(
-                  UUID.randomUUID(),
-                  criteria.value(),
-                  criteria.type(),
-                  criteria.operator()
-              ))
-              .collect(Collectors.toSet())
-      );
+        when(this.accountService.createRule(any())).thenReturn(output);
 
-      when(accountService.createRule(any())).thenReturn(output);
+        this.mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(this.objectMapper.writeValueAsString(input)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.name").value(input.name()))
+            .andExpect(jsonPath("$.description").value(input.description()))
+            .andExpect(jsonPath("$.action").value(input.action().name()))
+            .andExpect(jsonPath("$.criteria", hasSize(1)));
 
-      mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(input)))
-          .andExpect(status().isCreated())
-          .andExpect(jsonPath("$.id").exists())
-          .andExpect(jsonPath("$.name").value(input.name()))
-          .andExpect(jsonPath("$.description").value(input.description()))
-          .andExpect(jsonPath("$.action").value(input.action().name()))
-          .andExpect(jsonPath("$.criteria", hasSize(1)));
+        verify(this.accountService).createRule(input);
+    }
 
-      verify(accountService).createRule(input);
-  }
+    @Test
+    @DisplayName("Deve criar uma regra de exclusão com sucesso")
+    void shouldCreateDeleteRuleSuccessfully() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var input = new NewRuleInput(
+            accountId,
+            "Delete Old Emails",
+            "Delete emails older than 30 days",
+            RuleAction.DELETE,
+            Set.of(new NewRuleCriteriaInput(
+                "2024-01-01T00:00:00",
+                RuleCriteriaType.RECEIVED_AT,
+                RuleCriteriaOperator.GREATER_THAN
+            )),
+            null
+        );
 
-  @Test
-  @DisplayName("Deve criar uma regra de arquivamento com sucesso")
-  void shouldCreateArchiveRuleSuccessfully() throws Exception {
-      final var accountId = UUID.randomUUID();
-      final var input = new NewRuleInput(
-          accountId,
-          "Archive Old Emails",
-          "Archive emails older than 30 days",
-          RuleAction.ARCHIVE,
-          Set.of(new NewRuleCriteriaInput(
-              "2024-01-01T00:00:00",
-              RuleCriteriaType.RECEIVED_AT,
-              RuleCriteriaOperator.GREATER_THAN
-          )),
-          null
-      );
+        final var output = new NewRuleOutput(
+            UUID.randomUUID(),
+            input.name(),
+            input.description(),
+            input.action(),
+            input.criteria().stream()
+                .map(criteria -> new RuleCriteriaOutput(
+                    UUID.randomUUID(),
+                    criteria.value(),
+                    criteria.type(),
+                    criteria.operator()
+                ))
+                .collect(Collectors.toSet())
+        );
 
-      final var output = new NewRuleOutput(
-          UUID.randomUUID(),
-          input.name(),
-          input.description(),
-          input.action(),
-          input.criteria().stream()
-              .map(criteria -> new RuleCriteriaOutput(
-                  UUID.randomUUID(),
-                  criteria.value(),
-                  criteria.type(),
-                  criteria.operator()
-              ))
-              .collect(Collectors.toSet())
-      );
+        when(this.accountService.createRule(any())).thenReturn(output);
 
-      when(accountService.createRule(any())).thenReturn(output);
+        this.mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(this.objectMapper.writeValueAsString(input)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.name").value(input.name()))
+            .andExpect(jsonPath("$.description").value(input.description()))
+            .andExpect(jsonPath("$.action").value(input.action().name()))
+            .andExpect(jsonPath("$.criteria", hasSize(1)));
 
-      mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(input)))
-          .andExpect(status().isCreated())
-          .andExpect(jsonPath("$.id").exists())
-          .andExpect(jsonPath("$.name").value(input.name()))
-          .andExpect(jsonPath("$.description").value(input.description()))
-          .andExpect(jsonPath("$.action").value(input.action().name()))
-          .andExpect(jsonPath("$.criteria", hasSize(1)));
+        verify(this.accountService).createRule(input);
+    }
 
-      verify(accountService).createRule(input);
-  }
+    @Test
+    @DisplayName("Deve criar uma regra de arquivamento com sucesso")
+    void shouldCreateArchiveRuleSuccessfully() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var input = new NewRuleInput(
+            accountId,
+            "Archive Old Emails",
+            "Archive emails older than 30 days",
+            RuleAction.ARCHIVE,
+            Set.of(new NewRuleCriteriaInput(
+                "2024-01-01T00:00:00",
+                RuleCriteriaType.RECEIVED_AT,
+                RuleCriteriaOperator.GREATER_THAN
+            )),
+            null
+        );
 
-  @Test
-  @DisplayName("Deve retornar erro quando a conta não é encontrada")
-  void shouldReturnErrorWhenAccountNotFound() throws Exception {
-      final var accountId = UUID.randomUUID();
-      final var input = new NewRuleInput(
-          accountId,
-          "Archive Old Emails",
-          "Archive emails older than 30 days",
-          RuleAction.ARCHIVE,
-          Set.of(new NewRuleCriteriaInput(
-              "2024-01-01T00:00:00",
-              RuleCriteriaType.RECEIVED_AT,
-              RuleCriteriaOperator.GREATER_THAN
-          )),
-          null
-      );
+        final var output = new NewRuleOutput(
+            UUID.randomUUID(),
+            input.name(),
+            input.description(),
+            input.action(),
+            input.criteria().stream()
+                .map(criteria -> new RuleCriteriaOutput(
+                    UUID.randomUUID(),
+                    criteria.value(),
+                    criteria.type(),
+                    criteria.operator()
+                ))
+                .collect(Collectors.toSet())
+        );
 
-      when(accountService.createRule(any())).thenThrow(new EntityNotFoundException("Account not found"));
+        when(this.accountService.createRule(any())).thenReturn(output);
 
-      mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(input)))
-          .andExpect(status().isNotFound())
-          .andExpect(jsonPath("$.status").value(404))
-          .andExpect(jsonPath("$.error").value("Not Found"))
-          .andExpect(jsonPath("$.message").value("Resource not found"))
-          .andExpect(jsonPath("$.errors", hasSize(1)))
-          .andExpect(jsonPath("$.errors[0].message").value("Account not found"));
-  }
+        this.mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(this.objectMapper.writeValueAsString(input)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.name").value(input.name()))
+            .andExpect(jsonPath("$.description").value(input.description()))
+            .andExpect(jsonPath("$.action").value(input.action().name()))
+            .andExpect(jsonPath("$.criteria", hasSize(1)));
 
-  @Test
-  @DisplayName("Deve retornar erro quando campos obrigatórios da regra estão faltando")
-  void shouldReturnErrorWhenRuleRequiredFieldsAreMissing() throws Exception {
-      final var accountId = UUID.randomUUID();
-      final var jsonContent = """
-          {
-            "accountId": "%s"
-          }""".formatted(accountId);
+        verify(this.accountService).createRule(input);
+    }
 
-      mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(jsonContent))
-          .andExpect(status().isBadRequest())
-          .andExpect(jsonPath("$.status").value(400))
-          .andExpect(jsonPath("$.error").value("Validation Error"))
-          .andExpect(jsonPath("$.message").value("Invalid request parameters"))
-          .andExpect(jsonPath("$.errors", hasSize(4)))
-          .andExpect(jsonPath("$.errors[*].message").value(containsInAnyOrder(
-              "Nome da regra é obrigatório",
-              "Descrição da regra é obrigatória",
-              "Ação da regra é obrigatória",
-              "Pelo menos um critério é obrigatório"
-          )));
-  }
+    @Test
+    @DisplayName("Deve retornar erro quando a conta não é encontrada")
+    void shouldReturnErrorWhenAccountNotFound() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var input = new NewRuleInput(
+            accountId,
+            "Archive Old Emails",
+            "Archive emails older than 30 days",
+            RuleAction.ARCHIVE,
+            Set.of(new NewRuleCriteriaInput(
+                "2024-01-01T00:00:00",
+                RuleCriteriaType.RECEIVED_AT,
+                RuleCriteriaOperator.GREATER_THAN
+            )),
+            null
+        );
 
-  @Test
-  @DisplayName("Deve retornar erro quando o critério é inválido")
-  void shouldReturnErrorWhenCriteriaIsInvalid() throws Exception {
-      final var accountId = UUID.randomUUID();
-      final var input = new NewRuleInput(
-          accountId,
-          "Move to Archive",
-          "Move emails to archive folder",
-          RuleAction.MOVE,
-          Set.of(new NewRuleCriteriaInput(
-              "",  // empty value
-              RuleCriteriaType.FROM,
-              RuleCriteriaOperator.EQUALS
-          )),
-          new MoveRuleInput("INBOX", "ARCHIVE")
-      );
+        when(this.accountService.createRule(any())).thenThrow(new EntityNotFoundException("Account not found"));
 
-      mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(input)))
-          .andExpect(status().isBadRequest())
-          .andExpect(jsonPath("$.status").value(400))
-          .andExpect(jsonPath("$.error").value("Validation Error"))
-          .andExpect(jsonPath("$.message").value("Invalid request parameters"))
-          .andExpect(jsonPath("$.errors", hasSize(1)))
-          .andExpect(jsonPath("$.errors[0].message").value("Criteria value is required"));
-  }
+        this.mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(this.objectMapper.writeValueAsString(input)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status").value(NOT_FOUND_STATUS))
+            .andExpect(jsonPath("$.error").value("Not Found"))
+            .andExpect(jsonPath("$.message").value("Resource not found"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Account not found"));
+    }
 
-  @Test
-  @DisplayName("Deve retornar erro quando a configuração da regra de movimentação está faltando")
-  void shouldReturnErrorWhenMoveRuleConfigurationIsMissing() throws Exception {
-      final var accountId = UUID.randomUUID();
-      final var input = new NewRuleInput(
-          accountId,
-          "Move to Archive",
-          "Move emails to archive folder",
-          RuleAction.MOVE,
-          Set.of(new NewRuleCriteriaInput(
-              "test@email.com",
-              RuleCriteriaType.FROM,
-              RuleCriteriaOperator.EQUALS
-          )),
-          null
-      );
+    @Test
+    @DisplayName("Deve retornar erro quando campos obrigatórios da regra estão faltando")
+    void shouldReturnErrorWhenRuleRequiredFieldsAreMissing() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var jsonContent = """
+                                {
+                                  "accountId": "%s"
+                                }""".formatted(accountId);
 
-      mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(input)))
-          .andExpect(status().isBadRequest())
-          .andExpect(jsonPath("$.status").value(400))
-          .andExpect(jsonPath("$.error").value("Validation Error"))
-          .andExpect(jsonPath("$.message").value("Invalid request parameters"))
-          .andExpect(jsonPath("$.errors", hasSize(1)))
-          .andExpect(jsonPath("$.errors[0].message").value("Configuração de movimentação é obrigatória para ação MOVE"));
-  }
+        this.mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(jsonContent))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(BAD_REQUEST_STATUS))
+            .andExpect(jsonPath("$.error").value("Validation Error"))
+            .andExpect(jsonPath("$.message").value("Invalid request parameters"))
+            .andExpect(jsonPath("$.errors", hasSize(4)))
+            .andExpect(jsonPath("$.errors[*].message").value(containsInAnyOrder(
+                "Nome da regra é obrigatório",
+                "Descrição da regra é obrigatória",
+                "Ação da regra é obrigatória",
+                "Pelo menos um critério é obrigatório"
+            )));
+    }
 
-  @Test
-  @DisplayName("Deve retornar lista de todas as contas")
-  void shouldReturnListOfAllAccounts() throws Exception {
-    // given
-    final var now = LocalDateTime.now();
-    final var account1 = new AccountOutput(
-      UUID.randomUUID(),
-      "Account 1",
-      "account1@test.com",
-      "imap.test.com",
-      993,
-      "imap",
-      now,
-      now,
-      0
-    );
-    final var account2 = new AccountOutput(
-      UUID.randomUUID(),
-      "Account 2",
-      "account2@test.com",
-      "imap.test.com",
-      993,
-      "imap",
-      now,
-      now,
-      2
-    );
-    when(this.accountService.findAll()).thenReturn(List.of(account1, account2));
+    @Test
+    @DisplayName("Deve retornar erro quando o critério é inválido")
+    void shouldReturnErrorWhenCriteriaIsInvalid() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var input = new NewRuleInput(
+            accountId,
+            "Move to Archive",
+            "Move emails to archive folder",
+            RuleAction.MOVE,
+            Set.of(new NewRuleCriteriaInput(
+                "",
+                RuleCriteriaType.FROM,
+                RuleCriteriaOperator.EQUALS
+            )),
+            new MoveRuleInput("INBOX", "ARCHIVE")
+        );
 
-    // when / then
-    this.mockMvc.perform(get("/api/v1/accounts"))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$").isArray())
-      .andExpect(jsonPath("$", hasSize(2)))
-      .andExpect(jsonPath("$[0].id").value(account1.id().toString()))
-      .andExpect(jsonPath("$[0].name").value(account1.name()))
-      .andExpect(jsonPath("$[0].email").value(account1.email()))
-      .andExpect(jsonPath("$[0].host").value(account1.host()))
-      .andExpect(jsonPath("$[0].port").value(account1.port()))
-      .andExpect(jsonPath("$[0].protocol").value(account1.protocol()))
-      .andExpect(jsonPath("$[0].totalRules").value(account1.totalRules()))
-      .andExpect(jsonPath("$[1].id").value(account2.id().toString()))
-      .andExpect(jsonPath("$[1].name").value(account2.name()))
-      .andExpect(jsonPath("$[1].email").value(account2.email()))
-      .andExpect(jsonPath("$[1].host").value(account2.host()))
-      .andExpect(jsonPath("$[1].port").value(account2.port()))
-      .andExpect(jsonPath("$[1].protocol").value(account2.protocol()))
-      .andExpect(jsonPath("$[1].totalRules").value(account2.totalRules()));
-  }
+        this.mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(this.objectMapper.writeValueAsString(input)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(BAD_REQUEST_STATUS))
+            .andExpect(jsonPath("$.error").value("Validation Error"))
+            .andExpect(jsonPath("$.message").value("Invalid request parameters"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Criteria value is required"));
+    }
 
-  @Test
-  @DisplayName("Deve retornar conta quando encontrada pelo id")
-  void shouldReturnAccountWhenFoundById() throws Exception {
-    // given
-    final var id = UUID.randomUUID();
-    final var now = LocalDateTime.now();
-    final var rule = new DetailedRuleOutput(
-      UUID.randomUUID(),
-      "Test Rule",
-      "Test Description",
-      RuleAction.MOVE,
-      Set.of(new RuleCriteriaOutput(
-        UUID.randomUUID(),
-        "test@example.com",
-        RuleCriteriaType.FROM,
-        RuleCriteriaOperator.EQUALS
-      )),
-      "INBOX",
-      "Archive"
-    );
-    final var account = new DetailedAccountOutput(
-      id,
-      "Test Account",
-      "test@test.com",
-      "imap.test.com",
-      993,
-      "imap",
-      now,
-      now,
-      Set.of(rule)
-    );
-    when(this.accountService.findById(id)).thenReturn(account);
+    @Test
+    @DisplayName("Deve retornar erro quando a configuração da regra de movimentação está faltando")
+    void shouldReturnErrorWhenMoveRuleConfigurationIsMissing() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var input = new NewRuleInput(
+            accountId,
+            "Move to Archive",
+            "Move emails to archive folder",
+            RuleAction.MOVE,
+            Set.of(new NewRuleCriteriaInput(
+                "test@email.com",
+                RuleCriteriaType.FROM,
+                RuleCriteriaOperator.EQUALS
+            )),
+            null
+        );
 
-    // when / then
-    this.mockMvc.perform(get("/api/v1/accounts/{id}", id))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.id").value(account.id().toString()))
-      .andExpect(jsonPath("$.name").value(account.name()))
-      .andExpect(jsonPath("$.email").value(account.email()))
-      .andExpect(jsonPath("$.host").value(account.host()))
-      .andExpect(jsonPath("$.port").value(account.port()))
-      .andExpect(jsonPath("$.protocol").value(account.protocol()))
-      .andExpect(jsonPath("$.rules").isArray())
-      .andExpect(jsonPath("$.rules", hasSize(1)))
-      .andExpect(jsonPath("$.rules[0].id").value(rule.id().toString()))
-      .andExpect(jsonPath("$.rules[0].name").value(rule.name()))
-      .andExpect(jsonPath("$.rules[0].description").value(rule.description()))
-      .andExpect(jsonPath("$.rules[0].action").value(rule.action().toString()))
-      .andExpect(jsonPath("$.rules[0].sourceFolder").value(rule.sourceFolder()))
-      .andExpect(jsonPath("$.rules[0].targetFolder").value(rule.targetFolder()))
-      .andExpect(jsonPath("$.rules[0].criteria").isArray())
-      .andExpect(jsonPath("$.rules[0].criteria", hasSize(1)))
-      .andExpect(jsonPath("$.rules[0].criteria[0].value").value("test@example.com"))
-      .andExpect(jsonPath("$.rules[0].criteria[0].type").value("FROM"))
-      .andExpect(jsonPath("$.rules[0].criteria[0].operator").value("EQUALS"));
-  }
+        this.mockMvc.perform(post("/api/v1/accounts/{accountId}/rules", accountId)
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(this.objectMapper.writeValueAsString(input)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(BAD_REQUEST_STATUS))
+            .andExpect(jsonPath("$.error").value("Validation Error"))
+            .andExpect(jsonPath("$.message").value("Invalid request parameters"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Configuração de movimentação é obrigatória para ação MOVE"));
+    }
 
-  @Test
-  @DisplayName("Deve retornar 404 quando conta não for encontrada pelo id")
-  void shouldReturn404WhenAccountNotFoundById() throws Exception {
-    // given
-    final var id = UUID.randomUUID();
-    when(this.accountService.findById(id)).thenThrow(new EntityNotFoundException("Account not found"));
+    @Test
+    @DisplayName("Deve retornar lista de todas as contas")
+    void shouldReturnListOfAllAccounts() throws Exception {
+        final var now = LocalDateTime.now();
+        final var account1 = new AccountOutput(
+            UUID.randomUUID(),
+            "Account 1",
+            "account1@test.com",
+            "imap.test.com",
+            993,
+            "imap",
+            now,
+            now,
+            0
+        );
+        final var account2 = new AccountOutput(
+            UUID.randomUUID(),
+            "Account 2",
+            "account2@test.com",
+            "imap.test.com",
+            993,
+            "imap",
+            now,
+            now,
+            2
+        );
+        when(this.accountService.findAll()).thenReturn(List.of(account1, account2));
 
-    // when / then
-    this.mockMvc.perform(get("/api/v1/accounts/{id}", id))
-      .andExpect(status().isNotFound())
-      .andExpect(jsonPath("$.status").value(404))
-      .andExpect(jsonPath("$.error").value("Not Found"))
-      .andExpect(jsonPath("$.message").value("Resource not found"))
-      .andExpect(jsonPath("$.errors", hasSize(1)))
-      .andExpect(jsonPath("$.errors[0].message").value("Account not found"));
-  }
+        this.mockMvc.perform(get("/api/v1/accounts"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].id").value(account1.id().toString()))
+            .andExpect(jsonPath("$[0].name").value(account1.name()))
+            .andExpect(jsonPath("$[0].email").value(account1.email()))
+            .andExpect(jsonPath("$[0].host").value(account1.host()))
+            .andExpect(jsonPath("$[0].port").value(account1.port()))
+            .andExpect(jsonPath("$[0].protocol").value(account1.protocol()))
+            .andExpect(jsonPath("$[0].totalRules").value(account1.totalRules()))
+            .andExpect(jsonPath("$[1].id").value(account2.id().toString()))
+            .andExpect(jsonPath("$[1].name").value(account2.name()))
+            .andExpect(jsonPath("$[1].email").value(account2.email()))
+            .andExpect(jsonPath("$[1].host").value(account2.host()))
+            .andExpect(jsonPath("$[1].port").value(account2.port()))
+            .andExpect(jsonPath("$[1].protocol").value(account2.protocol()))
+            .andExpect(jsonPath("$[1].totalRules").value(account2.totalRules()));
+    }
 
-  @Test
-  @DisplayName("Deve remover regra de uma conta com sucesso")
-  void shouldDeleteRuleSuccessfully() throws Exception {
-    // given
-    final var accountId = UUID.randomUUID();
-    final var ruleId = UUID.randomUUID();
+    @Test
+    @DisplayName("Deve retornar conta quando encontrada pelo id")
+    void shouldReturnAccountWhenFoundById() throws Exception {
+        final var id = UUID.randomUUID();
+        final var now = LocalDateTime.now();
+        final var rule = new DetailedRuleOutput(
+            UUID.randomUUID(),
+            "Test Rule",
+            "Test Description",
+            RuleAction.MOVE,
+            Set.of(new RuleCriteriaOutput(
+                UUID.randomUUID(),
+                "test@example.com",
+                RuleCriteriaType.FROM,
+                RuleCriteriaOperator.EQUALS
+            )),
+            "INBOX",
+            "Archive"
+        );
+        final var account = new DetailedAccountOutput(
+            id,
+            "Test Account",
+            "test@test.com",
+            "imap.test.com",
+            993,
+            "imap",
+            now,
+            now,
+            Set.of(rule)
+        );
+        when(this.accountService.findById(id)).thenReturn(account);
 
-    // when / then
-    this.mockMvc.perform(delete("/api/v1/accounts/{accountId}/rules/{ruleId}", accountId, ruleId))
-      .andExpect(status().isNoContent());
+        this.mockMvc.perform(get("/api/v1/accounts/{id}", id))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(account.id().toString()))
+            .andExpect(jsonPath("$.name").value(account.name()))
+            .andExpect(jsonPath("$.email").value(account.email()))
+            .andExpect(jsonPath("$.host").value(account.host()))
+            .andExpect(jsonPath("$.port").value(account.port()))
+            .andExpect(jsonPath("$.protocol").value(account.protocol()))
+            .andExpect(jsonPath("$.rules").isArray())
+            .andExpect(jsonPath("$.rules", hasSize(1)))
+            .andExpect(jsonPath("$.rules[0].id").value(rule.id().toString()))
+            .andExpect(jsonPath("$.rules[0].name").value(rule.name()))
+            .andExpect(jsonPath("$.rules[0].description").value(rule.description()))
+            .andExpect(jsonPath("$.rules[0].action").value(rule.action().toString()))
+            .andExpect(jsonPath("$.rules[0].sourceFolder").value(rule.sourceFolder()))
+            .andExpect(jsonPath("$.rules[0].targetFolder").value(rule.targetFolder()))
+            .andExpect(jsonPath("$.rules[0].criteria").isArray())
+            .andExpect(jsonPath("$.rules[0].criteria", hasSize(1)))
+            .andExpect(jsonPath("$.rules[0].criteria[0].value").value("test@example.com"))
+            .andExpect(jsonPath("$.rules[0].criteria[0].type").value("FROM"))
+            .andExpect(jsonPath("$.rules[0].criteria[0].operator").value("EQUALS"));
+    }
 
-    verify(this.accountService).deleteRule(accountId, ruleId);
-  }
+    @Test
+    @DisplayName("Deve retornar 404 quando conta não for encontrada pelo id")
+    void shouldReturn404WhenAccountNotFoundById() throws Exception {
+        final var id = UUID.randomUUID();
+        when(this.accountService.findById(id)).thenThrow(new EntityNotFoundException("Account not found"));
 
-  @Test
-  @DisplayName("Deve retornar 404 quando conta não for encontrada ao remover regra")
-  void shouldReturn404WhenAccountNotFoundOnDeleteRule() throws Exception {
-    // given
-    final var accountId = UUID.randomUUID();
-    final var ruleId = UUID.randomUUID();
+        this.mockMvc.perform(get("/api/v1/accounts/{id}", id))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status").value(NOT_FOUND_STATUS))
+            .andExpect(jsonPath("$.error").value("Not Found"))
+            .andExpect(jsonPath("$.message").value("Resource not found"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Account not found"));
+    }
 
-    org.mockito.Mockito.doThrow(new EntityNotFoundException("Account not found"))
-      .when(this.accountService).deleteRule(accountId, ruleId);
+    @Test
+    @DisplayName("Deve remover regra de uma conta com sucesso")
+    void shouldDeleteRuleSuccessfully() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var ruleId = UUID.randomUUID();
 
-    // when / then
-    this.mockMvc.perform(delete("/api/v1/accounts/{accountId}/rules/{ruleId}", accountId, ruleId))
-      .andExpect(status().isNotFound())
-      .andExpect(jsonPath("$.status").value(404))
-      .andExpect(jsonPath("$.error").value("Not Found"))
-      .andExpect(jsonPath("$.message").value("Resource not found"))
-      .andExpect(jsonPath("$.errors", hasSize(1)))
-      .andExpect(jsonPath("$.errors[0].message").value("Account not found"));
-  }
+        this.mockMvc.perform(delete("/api/v1/accounts/{accountId}/rules/{ruleId}", accountId, ruleId))
+            .andExpect(status().isNoContent());
 
-  @Test
-  @DisplayName("Deve retornar 404 quando regra não for encontrada ao remover regra")
-  void shouldReturn404WhenRuleNotFoundOnDeleteRule() throws Exception {
-    // given
-    final var accountId = UUID.randomUUID();
-    final var ruleId = UUID.randomUUID();
+        verify(this.accountService).deleteRule(accountId, ruleId);
+    }
 
-    org.mockito.Mockito.doThrow(new EntityNotFoundException("Rule not found"))
-      .when(this.accountService).deleteRule(accountId, ruleId);
+    @Test
+    @DisplayName("Deve retornar 404 quando conta não for encontrada ao remover regra")
+    void shouldReturn404WhenAccountNotFoundOnDeleteRule() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var ruleId = UUID.randomUUID();
 
-    // when / then
-    this.mockMvc.perform(delete("/api/v1/accounts/{accountId}/rules/{ruleId}", accountId, ruleId))
-      .andExpect(status().isNotFound())
-      .andExpect(jsonPath("$.status").value(404))
-      .andExpect(jsonPath("$.error").value("Not Found"))
-      .andExpect(jsonPath("$.message").value("Resource not found"))
-      .andExpect(jsonPath("$.errors", hasSize(1)))
-      .andExpect(jsonPath("$.errors[0].message").value("Rule not found"));
-  }
+        org.mockito.Mockito.doThrow(new EntityNotFoundException("Account not found"))
+            .when(this.accountService).deleteRule(accountId, ruleId);
+
+        this.mockMvc.perform(delete("/api/v1/accounts/{accountId}/rules/{ruleId}", accountId, ruleId))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status").value(NOT_FOUND_STATUS))
+            .andExpect(jsonPath("$.error").value("Not Found"))
+            .andExpect(jsonPath("$.message").value("Resource not found"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Account not found"));
+    }
+
+    @Test
+    @DisplayName("Deve retornar 404 quando regra não for encontrada ao remover regra")
+    void shouldReturn404WhenRuleNotFoundOnDeleteRule() throws Exception {
+        final var accountId = UUID.randomUUID();
+        final var ruleId = UUID.randomUUID();
+
+        org.mockito.Mockito.doThrow(new EntityNotFoundException("Rule not found"))
+            .when(this.accountService).deleteRule(accountId, ruleId);
+
+        this.mockMvc.perform(delete("/api/v1/accounts/{accountId}/rules/{ruleId}", accountId, ruleId))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status").value(NOT_FOUND_STATUS))
+            .andExpect(jsonPath("$.error").value("Not Found"))
+            .andExpect(jsonPath("$.message").value("Resource not found"))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors[0].message").value("Rule not found"));
+    }
 
 }
