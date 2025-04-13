@@ -4,14 +4,13 @@ import dev.da0hn.email.management.system.core.domain.Account;
 import dev.da0hn.email.management.system.core.domain.AccountCredentials;
 import dev.da0hn.email.management.system.core.domain.EmailConnectionDetails;
 import dev.da0hn.email.management.system.core.ports.spi.AccountRepository;
-import dev.da0hn.email.management.system.infrastructure.db.config.PostgresTestContainer;
+import dev.da0hn.email.management.system.infrastructure.db.PostgreSQLPerClassTestcontainers;
+import dev.da0hn.email.management.system.infrastructure.db.repository.AccountJpaRepository;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -19,13 +18,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Testcontainers
-@SpringBootTest
-@ActiveProfiles("test")
-class AccountRepositoryImplIT extends PostgresTestContainer {
+@PostgreSQLPerClassTestcontainers
+class AccountRepositoryImplIT {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private AccountJpaRepository accountJpaRepository;
 
     private Account createTestAccount() {
         return Account.builder()
@@ -48,6 +48,11 @@ class AccountRepositoryImplIT extends PostgresTestContainer {
             )
             .rules(new HashSet<>())
             .build();
+    }
+
+    @BeforeEach
+    void setUp() {
+        this.accountJpaRepository.deleteAll();
     }
 
     @Test

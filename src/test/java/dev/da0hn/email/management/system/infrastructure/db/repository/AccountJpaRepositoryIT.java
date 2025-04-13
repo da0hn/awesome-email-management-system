@@ -1,14 +1,12 @@
 package dev.da0hn.email.management.system.infrastructure.db.repository;
 
-import dev.da0hn.email.management.system.infrastructure.db.config.PostgresTestContainer;
+import dev.da0hn.email.management.system.infrastructure.db.PostgreSQLPerClassTestcontainers;
 import dev.da0hn.email.management.system.infrastructure.db.entities.AccountEntity;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,10 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Testcontainers
-@SpringBootTest
-@ActiveProfiles("test")
-class AccountJpaRepositoryIT extends PostgresTestContainer {
+@PostgreSQLPerClassTestcontainers
+class AccountJpaRepositoryIT {
 
     @Autowired
     private AccountJpaRepository accountJpaRepository;
@@ -37,6 +33,11 @@ class AccountJpaRepositoryIT extends PostgresTestContainer {
             .protocol("smtp")
             .rules(new ArrayList<>())
             .build();
+    }
+
+    @BeforeEach
+    void setUp() {
+        this.accountJpaRepository.deleteAll();
     }
 
     @Test
@@ -82,8 +83,6 @@ class AccountJpaRepositoryIT extends PostgresTestContainer {
     @Test
     @DisplayName("Deve buscar uma lista de AccountEntity existentes")
     void shouldFindAllAccountEntities() {
-        this.accountJpaRepository.deleteAll();
-
         final var accountEntity1 = this.createTestAccountEntity();
         final var accountEntity2 = this.createTestAccountEntity();
         this.accountJpaRepository.saveAll(List.of(accountEntity1, accountEntity2));
