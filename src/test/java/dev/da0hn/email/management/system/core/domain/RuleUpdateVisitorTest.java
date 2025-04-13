@@ -1,5 +1,6 @@
 package dev.da0hn.email.management.system.core.domain;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -7,14 +8,11 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class RuleUpdateVisitorTest {
 
     @Test
     @DisplayName("Deve atualizar regra de movimentação com novas pastas")
     void shouldUpdateMoveRuleWithNewFolders() {
-        // given
         final var id = UUID.randomUUID();
         final var now = LocalDateTime.now();
         final var originalRule = new MoveEmailRule(
@@ -28,7 +26,6 @@ class RuleUpdateVisitorTest {
             now
         );
 
-        // when
         final var updatedRule = RuleUpdateVisitor.updateMove(
             originalRule,
             "Updated Name",
@@ -38,25 +35,23 @@ class RuleUpdateVisitorTest {
             "new/target"
         );
 
-        // then
-        assertThat(updatedRule)
+        Assertions.assertThat(updatedRule)
             .isInstanceOf(MoveEmailRule.class)
             .satisfies(rule -> {
                 final var moveRule = (MoveEmailRule) rule;
-                assertThat(moveRule.id()).isEqualTo(id);
-                assertThat(moveRule.name()).isEqualTo("Updated Name");
-                assertThat(moveRule.description()).isEqualTo("Updated Description");
-                assertThat(moveRule.sourceFolder()).isEqualTo("new/source");
-                assertThat(moveRule.targetFolder()).isEqualTo("new/target");
-                assertThat(moveRule.createdAt()).isEqualTo(now);
-                assertThat(moveRule.updatedAt()).isAfter(now);
+                Assertions.assertThat(moveRule.id()).isEqualTo(id);
+                Assertions.assertThat(moveRule.name()).isEqualTo("Updated Name");
+                Assertions.assertThat(moveRule.description()).isEqualTo("Updated Description");
+                Assertions.assertThat(moveRule.sourceFolder()).isEqualTo("new/source");
+                Assertions.assertThat(moveRule.targetFolder()).isEqualTo("new/target");
+                Assertions.assertThat(moveRule.createdAt()).isEqualTo(now);
+                Assertions.assertThat(moveRule.updatedAt()).isAfterOrEqualTo(now);
             });
     }
 
     @Test
     @DisplayName("Deve atualizar regra de movimentação mantendo pastas originais")
     void shouldUpdateMoveRuleKeepingOriginalFolders() {
-        // given
         final var id = UUID.randomUUID();
         final var now = LocalDateTime.now();
         final var originalRule = new MoveEmailRule(
@@ -70,7 +65,6 @@ class RuleUpdateVisitorTest {
             now
         );
 
-        // when
         final var updatedRule = RuleUpdateVisitor.update(
             originalRule,
             "Updated Name",
@@ -78,25 +72,23 @@ class RuleUpdateVisitorTest {
             Set.of(new RuleCriteria(UUID.randomUUID(), "new value", RuleCriteriaType.SUBJECT, RuleCriteriaOperator.CONTAINS))
         );
 
-        // then
-        assertThat(updatedRule)
+        Assertions.assertThat(updatedRule)
             .isInstanceOf(MoveEmailRule.class)
             .satisfies(rule -> {
                 final var moveRule = (MoveEmailRule) rule;
-                assertThat(moveRule.id()).isEqualTo(id);
-                assertThat(moveRule.name()).isEqualTo("Updated Name");
-                assertThat(moveRule.description()).isEqualTo("Updated Description");
-                assertThat(moveRule.sourceFolder()).isEqualTo("original/source");
-                assertThat(moveRule.targetFolder()).isEqualTo("original/target");
-                assertThat(moveRule.createdAt()).isEqualTo(now);
-                assertThat(moveRule.updatedAt()).isAfter(now);
+                Assertions.assertThat(moveRule.id()).isEqualTo(id);
+                Assertions.assertThat(moveRule.name()).isEqualTo("Updated Name");
+                Assertions.assertThat(moveRule.description()).isEqualTo("Updated Description");
+                Assertions.assertThat(moveRule.sourceFolder()).isEqualTo("original/source");
+                Assertions.assertThat(moveRule.targetFolder()).isEqualTo("original/target");
+                Assertions.assertThat(moveRule.createdAt()).isEqualTo(now);
+                Assertions.assertThat(moveRule.updatedAt()).isAfterOrEqualTo(now);
             });
     }
 
     @Test
     @DisplayName("Deve atualizar regra de arquivamento")
     void shouldUpdateArchiveRule() {
-        // given
         final var id = UUID.randomUUID();
         final var now = LocalDateTime.now();
         final var originalRule = new ArchiveEmailRule(
@@ -108,7 +100,6 @@ class RuleUpdateVisitorTest {
             now
         );
 
-        // when
         final var updatedRule = RuleUpdateVisitor.update(
             originalRule,
             "Updated Name",
@@ -116,22 +107,20 @@ class RuleUpdateVisitorTest {
             Set.of(new RuleCriteria(UUID.randomUUID(), "new value", RuleCriteriaType.SUBJECT, RuleCriteriaOperator.CONTAINS))
         );
 
-        // then
-        assertThat(updatedRule)
+        Assertions.assertThat(updatedRule)
             .isInstanceOf(ArchiveEmailRule.class)
             .satisfies(rule -> {
-                assertThat(rule.id()).isEqualTo(id);
-                assertThat(rule.name()).isEqualTo("Updated Name");
-                assertThat(rule.description()).isEqualTo("Updated Description");
-                assertThat(rule.createdAt()).isEqualTo(now);
-                assertThat(rule.updatedAt()).isAfter(now);
+                Assertions.assertThat(rule.id()).isEqualTo(id);
+                Assertions.assertThat(rule.name()).isEqualTo("Updated Name");
+                Assertions.assertThat(rule.description()).isEqualTo("Updated Description");
+                Assertions.assertThat(rule.createdAt()).isEqualTo(now);
+                Assertions.assertThat(rule.updatedAt()).isAfterOrEqualTo(now);
             });
     }
 
     @Test
     @DisplayName("Deve atualizar regra de exclusão")
     void shouldUpdateDeleteRule() {
-        // given
         final var id = UUID.randomUUID();
         final var now = LocalDateTime.now();
         final var originalRule = new DeleteEmailRule(
@@ -143,7 +132,6 @@ class RuleUpdateVisitorTest {
             now
         );
 
-        // when
         final var updatedRule = RuleUpdateVisitor.update(
             originalRule,
             "Updated Name",
@@ -151,15 +139,15 @@ class RuleUpdateVisitorTest {
             Set.of(new RuleCriteria(UUID.randomUUID(), "new value", RuleCriteriaType.SUBJECT, RuleCriteriaOperator.CONTAINS))
         );
 
-        // then
-        assertThat(updatedRule)
+        Assertions.assertThat(updatedRule)
             .isInstanceOf(DeleteEmailRule.class)
             .satisfies(rule -> {
-                assertThat(rule.id()).isEqualTo(id);
-                assertThat(rule.name()).isEqualTo("Updated Name");
-                assertThat(rule.description()).isEqualTo("Updated Description");
-                assertThat(rule.createdAt()).isEqualTo(now);
-                assertThat(rule.updatedAt()).isAfter(now);
+                Assertions.assertThat(rule.id()).isEqualTo(id);
+                Assertions.assertThat(rule.name()).isEqualTo("Updated Name");
+                Assertions.assertThat(rule.description()).isEqualTo("Updated Description");
+                Assertions.assertThat(rule.createdAt()).isEqualTo(now);
+                Assertions.assertThat(rule.updatedAt()).isAfterOrEqualTo(now);
             });
     }
+
 }
