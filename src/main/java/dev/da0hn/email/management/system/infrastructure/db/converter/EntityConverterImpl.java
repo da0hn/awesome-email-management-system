@@ -13,7 +13,7 @@ public class EntityConverterImpl implements EntityConverter {
 
     @Override
     public <E extends DataLayerEntity, D> E toEntity(final D source, final Class<E> targetClass) {
-        if (this.conversionService.canConvert(targetClass, source.getClass())) {
+        if (!this.conversionService.canConvert(targetClass, source.getClass())) {
             throw new IllegalArgumentException("Não é possível converter o domínio %s para a entidade %s".formatted(
                 source.getClass().getSimpleName(),
                 targetClass.getSimpleName()
@@ -24,7 +24,7 @@ public class EntityConverterImpl implements EntityConverter {
 
     @Override
     public <E, D> D toDomain(final E source, final Class<? extends D> targetClass) {
-        if (this.conversionService.canConvert(source.getClass(), targetClass)) {
+        if (!this.conversionService.canConvert(source.getClass(), targetClass)) {
             throw new IllegalArgumentException("Não é possível converter a entidade %s para o domínio %s".formatted(
                 source.getClass().getSimpleName(),
                 targetClass.getSimpleName()
