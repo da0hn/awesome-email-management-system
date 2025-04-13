@@ -15,14 +15,17 @@ spring:
       enabled: ${DOCKER_COMPOSE_ENABLED:false}
       lifecycle-management: start_only
   mail:
-    host: imap.gmail.com
-    port: 993
-    protocol: imaps
+    host: smtp.gmail.com
+    port: 587
+    protocol: smtp
     username: ${EMAIL_USERNAME}
     password: ${EMAIL_PASSWORD}
     properties:
       mail.store.protocol: imaps
       mail.imap.ssl.enable: true
+      mail.transport.protocol: smtp
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
       mail.debug: true
   jpa:
     open-in-view: false
