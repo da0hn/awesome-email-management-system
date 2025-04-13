@@ -40,7 +40,7 @@ class AccountJpaRepositoryIT extends PostgresTestContainer {
     }
 
     @Test
-    @DisplayName("Should save account entity successfully")
+    @DisplayName("Deve salvar AccountEntity com sucesso")
     void shouldSaveAccountEntitySuccessfully() {
         final var accountEntity = this.createTestAccountEntity();
 
@@ -58,7 +58,7 @@ class AccountJpaRepositoryIT extends PostgresTestContainer {
     }
 
     @Test
-    @DisplayName("Should find account entity by id")
+    @DisplayName("Deve buscar AccountEntity por ID")
     void shouldFindAccountEntityById() {
         final var accountEntity = this.createTestAccountEntity();
         this.accountJpaRepository.save(accountEntity);
@@ -70,7 +70,7 @@ class AccountJpaRepositoryIT extends PostgresTestContainer {
     }
 
     @Test
-    @DisplayName("Should return empty when account entity not found")
+    @DisplayName("Deve retornar vazio quando AccountEntity não encontrado")
     void shouldReturnEmptyWhenAccountEntityNotFound() {
         final var nonExistentId = UUID.randomUUID();
 
@@ -80,7 +80,7 @@ class AccountJpaRepositoryIT extends PostgresTestContainer {
     }
 
     @Test
-    @DisplayName("Should find all account entities")
+    @DisplayName("Deve buscar uma lista de AccountEntity existentes")
     void shouldFindAllAccountEntities() {
         this.accountJpaRepository.deleteAll();
 
