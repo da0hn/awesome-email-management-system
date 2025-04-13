@@ -3,8 +3,6 @@ package dev.da0hn.email.management.system.infrastructure.db.entities;
 import dev.da0hn.email.management.system.shared.interfaces.DataLayerEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -19,6 +17,7 @@ import org.hibernate.type.SqlTypes;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -36,7 +35,6 @@ public class AccountEntity implements Serializable, DataLayerEntity {
     private static final long serialVersionUID = 2778045198402283098L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, columnDefinition = "uuid")
     private UUID id;
 
@@ -67,7 +65,7 @@ public class AccountEntity implements Serializable, DataLayerEntity {
     // @Type(JsonType.class)
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, name = "rules", columnDefinition = "jsonb")
-    private List<RuleJson> rules;
+    private List<RuleJson> rules = new ArrayList<>();
 
     @Override
     public final int hashCode() {

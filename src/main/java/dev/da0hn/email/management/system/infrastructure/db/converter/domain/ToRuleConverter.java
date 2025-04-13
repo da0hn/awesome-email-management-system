@@ -1,8 +1,5 @@
 package dev.da0hn.email.management.system.infrastructure.db.converter.domain;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import dev.da0hn.email.management.system.core.domain.ArchiveEmailRule;
 import dev.da0hn.email.management.system.core.domain.DeleteEmailRule;
 import dev.da0hn.email.management.system.core.domain.MoveEmailRule;
@@ -13,6 +10,10 @@ import dev.da0hn.email.management.system.infrastructure.db.entities.RuleJson;
 import dev.da0hn.email.management.system.shared.annotations.Mapper;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Mapper
 @AllArgsConstructor
@@ -50,6 +51,9 @@ public class ToRuleConverter implements Converter<RuleJson, Rule> {
     }
 
     private Set<RuleCriteria> convertCriteria(final RuleJson source) {
+        if (source.getCriteria() == null) {
+            return Collections.emptySet();
+        }
         return source.getCriteria().stream()
             .map(this.toRuleCriteriaConverter::convert)
             .collect(Collectors.toSet());
